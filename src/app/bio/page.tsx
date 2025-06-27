@@ -2,7 +2,6 @@
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import BackToHome from "@/components/BackToHome";
 import ContactButton from "@/components/ContactButton";
 import { useLanguage } from "@/hooks/use-language";
 import { useConfig } from "@/hooks/use-config";
@@ -52,7 +51,7 @@ export default function Bio() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
-        <Header showTags={true} tags={tags} currentPage="bio" />
+        <Header showTags={true} tags={tags} />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-start animate-pulse">
@@ -76,8 +75,7 @@ export default function Bio() {
   if (!config) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
-        <Header showTags={true} tags={tags} currentPage="bio" />
-        <BackToHome />
+        <Header showTags={true} tags={tags} />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
             <p className="text-gray-500 text-lg">
@@ -99,8 +97,7 @@ export default function Bio() {
 
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
-      <Header showTags={true} tags={tags} currentPage="bio" />
-      <BackToHome />
+      <Header showTags={true} tags={tags} />
 
       <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
         <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
