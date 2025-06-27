@@ -40,7 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/src/generated/prisma
+# generated files
+/src/generated/
 
 # clerk configuration (can include secrets)
 /.clerk/
