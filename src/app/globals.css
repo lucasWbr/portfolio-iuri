@@ -1,3 +1,6 @@
+/* Google Fonts - Oswald */
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap");
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -12,6 +15,7 @@
     "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Songti TC", "Songti SC",
     SimSun, "Nanum Myeongjo", NanumMyeongjo, Batang, serif;
   --font-mono: var(--font-geist-mono);
+  --font-oswald: "Oswald", sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -127,6 +131,11 @@
 
 .bg-works-custom {
   background-color: #ffffff;
+}
+
+/* Classe para fonte Oswald */
+.font-oswald {
+  font-family: var(--font-oswald);
 }
 
 @layer base {

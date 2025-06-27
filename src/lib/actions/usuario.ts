@@ -8,8 +8,7 @@ export async function getUsuario() {
   try {
     const usuario = await prisma.usuario.findFirst();
     return { success: true, data: usuario };
-  } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
+  } catch {
     return { success: false, error: "Erro ao buscar dados do usuário" };
   }
 }
@@ -21,6 +20,9 @@ export async function updateUsuario(data: UsuarioFormData) {
 
     // Buscar usuário existente
     const existingUser = await prisma.usuario.findFirst();
+
+    // Capturar foto antiga para possível limpeza
+    const oldFotoBio = existingUser?.fotoBio;
 
     let usuario;
     if (existingUser) {
@@ -36,13 +38,30 @@ export async function updateUsuario(data: UsuarioFormData) {
       });
     }
 
+    // Limpeza automática: remover foto antiga se foi alterada
+    if (oldFotoBio && oldFotoBio !== validatedData.fotoBio) {
+      try {
+        const { safeDeleteFile } = await import("@/lib/supabase-cleanup");
+        await safeDeleteFile(oldFotoBio);
+      } catch {
+        // Não falha a operação principal se a limpeza falhar
+      }
+    }
+
+    // Limpeza geral de arquivos órfãos (máximo 30 minutos)
+    try {
+      const { cleanupOrphanedFiles } = await import("@/lib/supabase-cleanup");
+      await cleanupOrphanedFiles(30);
+    } catch {
+      // Limpeza falhou silenciosamente
+    }
+
     revalidatePath("/");
     revalidatePath("/bio");
     revalidatePath("/admin/dashboard");
 
     return { success: true, data: usuario };
   } catch (error) {
-    console.error("Erro ao atualizar usuário:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro ao salvar dados",

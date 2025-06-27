@@ -120,18 +120,6 @@ export async function findOrphanedFiles(): Promise<{
   error?: string;
 }> {
   try {
-    // Lista todos os arquivos no storage
-    const { data: files, error: storageError } = await supabaseAdmin.storage
-      .from("portfolio-iuri")
-      .list("", {
-        limit: 1000,
-        sortBy: { column: "created_at", order: "desc" },
-      });
-
-    if (storageError) {
-      return { success: false, orphanedFiles: [], error: storageError.message };
-    }
-
     // Lista todos os arquivos recursivamente
     const allFiles: string[] = [];
     const listFilesRecursively = async (path: string = "") => {
@@ -155,13 +143,20 @@ export async function findOrphanedFiles(): Promise<{
 
     await listFilesRecursively();
 
-    // Busca todas as URLs de imagens no banco de dados
+    // Busca todas as URLs no banco de dados
     const { prisma } = await import("./prisma");
-    const trabalhos = await prisma.trabalhos.findMany({
-      select: { image: true },
-    });
+    const [trabalhos, usuarios] = await Promise.all([
+      prisma.trabalhos.findMany({
+        select: { image: true },
+      }),
+      prisma.usuario.findMany({
+        select: { fotoBio: true },
+      }),
+    ]);
 
     const usedFiles = new Set<string>();
+
+    // Adicionar arquivos dos trabalhos
     trabalhos.forEach((trabalho) => {
       trabalho.image.forEach((url) => {
         const path = extractFilePathFromUrl(url);
@@ -171,6 +166,16 @@ export async function findOrphanedFiles(): Promise<{
       });
     });
 
+    // Adicionar arquivos dos usuários
+    usuarios.forEach((usuario) => {
+      if (usuario.fotoBio) {
+        const path = extractFilePathFromUrl(usuario.fotoBio);
+        if (path) {
+          usedFiles.add(path);
+        }
+      }
+    });
+
     // Identifica arquivos órfãos
     const orphanedFiles = allFiles.filter((file) => !usedFiles.has(file));
 
@@ -178,5 +183,123 @@ export async function findOrphanedFiles(): Promise<{
   } catch (error) {
     console.error("Erro ao buscar arquivos órfãos:", error);
     return { success: false, orphanedFiles: [], error: "Erro inesperado" };
+  }
+}
+
+/**
+ * Remove arquivos órfãos automaticamente (com validação de idade)
+ */
+export async function cleanupOrphanedFiles(
+  maxAgeMinutes: number = 60
+): Promise<{
+  success: boolean;
+  deletedCount: number;
+  errors: string[];
+}> {
+  try {
+    const { success, orphanedFiles } = await findOrphanedFiles();
+    if (!success || orphanedFiles.length === 0) {
+      return { success: true, deletedCount: 0, errors: [] };
+    }
+
+    // Verificar idade dos arquivos (proteção contra deleção de arquivos recentes)
+    const filesToDelete: string[] = [];
+    const cutoffTime = new Date(Date.now() - maxAgeMinutes * 60 * 1000);
+
+    for (const filePath of orphanedFiles) {
+      const { data: fileInfo } = await supabaseAdmin.storage
+        .from("portfolio-iuri")
+        .list(filePath.split("/").slice(0, -1).join("/"), {
+          search: filePath.split("/").pop(),
+        });
+
+      if (fileInfo && fileInfo[0]) {
+        const createdAt = new Date(fileInfo[0].created_at);
+        if (createdAt < cutoffTime) {
+          filesToDelete.push(filePath);
+        }
+      }
+    }
+
+    if (filesToDelete.length === 0) {
+      return { success: true, deletedCount: 0, errors: [] };
+    }
+
+    // Deletar arquivos órfãos antigos
+    const { error } = await supabaseAdmin.storage
+      .from("portfolio-iuri")
+      .remove(filesToDelete);
+
+    if (error) {
+      return { success: false, deletedCount: 0, errors: [error.message] };
+    }
+
+    return { success: true, deletedCount: filesToDelete.length, errors: [] };
+  } catch (error) {
+    console.error("Erro na limpeza automática:", error);
+    return { success: false, deletedCount: 0, errors: ["Erro inesperado"] };
+  }
+}
+
+/**
+ * Valida se uma URL ainda é referenciada no banco de dados
+ */
+export async function isFileStillReferenced(url: string): Promise<boolean> {
+  try {
+    const { prisma } = await import("./prisma");
+
+    // Verificar em trabalhos
+    const trabalhoCount = await prisma.trabalhos.count({
+      where: {
+        image: {
+          has: url,
+        },
+      },
+    });
+
+    if (trabalhoCount > 0) return true;
+
+    // Verificar em usuários
+    const usuarioCount = await prisma.usuario.count({
+      where: {
+        fotoBio: url,
+      },
+    });
+
+    return usuarioCount > 0;
+  } catch (error) {
+    console.error("Erro ao verificar referência do arquivo:", error);
+    return true; // Em caso de erro, assume que ainda está referenciado para segurança
+  }
+}
+
+/**
+ * Remove arquivo apenas se não estiver mais referenciado
+ */
+export async function safeDeleteFile(url: string): Promise<{
+  success: boolean;
+  deleted: boolean;
+  error?: string;
+}> {
+  try {
+    const isReferenced = await isFileStillReferenced(url);
+
+    if (isReferenced) {
+      return {
+        success: true,
+        deleted: false,
+        error: "Arquivo ainda está sendo referenciado",
+      };
+    }
+
+    const result = await deleteFileFromStorage(url);
+    return {
+      success: result.success,
+      deleted: result.success,
+      error: result.error,
+    };
+  } catch (error) {
+    console.error("Erro na deleção segura:", error);
+    return { success: false, deleted: false, error: "Erro inesperado" };
   }
 }

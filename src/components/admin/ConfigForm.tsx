@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -12,6 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -30,8 +38,10 @@ import {
 } from "@/components/ui/select";
 import { usuarioSchema, type UsuarioFormData } from "@/lib/validations/usuario";
 import { updateUsuario, getUsuario } from "@/lib/actions/usuario";
-import { Loader2 } from "lucide-react";
-import FileUpload from "./FileUpload";
+import { Loader2, AlertTriangle, X, Trash2 } from "lucide-react";
+import FileUploadStaging, {
+  type FileUploadStagingRef,
+} from "./FileUploadStaging";
 
 // Função para formatar telefone brasileiro
 const formatTelefone = (value: string): string => {
@@ -58,21 +68,30 @@ const formatTelefone = (value: string): string => {
 
 export default function ConfigForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState<UsuarioFormData | null>(
+    null
+  );
+  const [removePhotoModal, setRemovePhotoModal] = useState(false);
+
+  // Ref para o upload de foto da bio
+  const photoUploadRef = useRef<FileUploadStagingRef>(null);
+
+  const defaultValues = {
+    name: "",
+    text: "",
+    textEn: "",
+    fotoBio: "",
+    email: "",
+    telefone: "",
+    behance: "",
+    linkedin: "",
+    facebook: "",
+    instagram: "",
+  };
 
   const form = useForm<UsuarioFormData>({
     resolver: zodResolver(usuarioSchema),
-    defaultValues: {
-      name: "",
-      text: "",
-      textEn: "",
-      fotoBio: "",
-      email: "",
-      telefone: "",
-      behance: "",
-      linkedin: "",
-      facebook: "",
-      instagram: "",
-    },
+    defaultValues,
   });
 
   // Carregar dados existentes
@@ -94,6 +113,7 @@ export default function ConfigForm() {
           instagram: result.data.instagram || "",
         };
         form.reset(formData);
+        setInitialValues(formData);
       }
     }
     loadData();
@@ -102,10 +122,31 @@ export default function ConfigForm() {
   async function onSubmit(data: UsuarioFormData) {
     setIsLoading(true);
     try {
-      const result = await updateUsuario(data);
+      // Fazer upload da foto pendente primeiro, se houver
+      let uploadedPhotoUrl = "";
+      if (photoUploadRef.current?.hasPendingFiles) {
+        try {
+          const uploadedUrls =
+            await photoUploadRef.current.uploadPendingFiles();
+          uploadedPhotoUrl = uploadedUrls[0] || "";
+        } catch (uploadError) {
+          toast.error("Erro ao enviar foto. Tente novamente.");
+          return;
+        }
+      }
+
+      // Preparar dados finais
+      const finalData = {
+        ...data,
+        fotoBio: uploadedPhotoUrl || data.fotoBio,
+      };
+
+      const result = await updateUsuario(finalData);
 
       if (result.success) {
         toast.success("Configurações salvas com sucesso!");
+        // Atualizar valores iniciais
+        setInitialValues(finalData);
         // Notificar outras abas/componentes sobre a mudança
         window.dispatchEvent(new Event("config-updated"));
         // Forçar recarregamento das configurações
@@ -119,6 +160,31 @@ export default function ConfigForm() {
       setIsLoading(false);
     }
   }
+
+  const handleCancel = () => {
+    if (initialValues) {
+      form.reset(initialValues);
+      photoUploadRef.current?.clearPendingFiles();
+      toast.info("Alterações canceladas");
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    form.setValue("fotoBio", "");
+    setRemovePhotoModal(false);
+    toast.success("Foto removida");
+  };
+
+  const hasPendingChanges = () => {
+    if (!initialValues) return false;
+
+    const currentValues = form.getValues();
+    const hasFormChanges =
+      JSON.stringify(currentValues) !== JSON.stringify(initialValues);
+    const hasPendingFiles = photoUploadRef.current?.hasPendingFiles;
+
+    return hasFormChanges || hasPendingFiles;
+  };
 
   return (
     <Card>
@@ -191,19 +257,42 @@ export default function ConfigForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Foto da Bio (Opcional)</FormLabel>
-                    <FormControl>
-                      <FileUpload
-                        value={field.value ? [field.value] : []}
-                        onChange={(urls) => field.onChange(urls[0] || "")}
-                        maxFiles={1}
-                        acceptedTypes={[
-                          "image/jpeg",
-                          "image/png",
-                          "image/webp",
-                        ]}
-                        folder="bio"
-                      />
-                    </FormControl>
+                    <div className="space-y-3">
+                      {field.value && (
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-green-600">
+                            Foto atual salva
+                          </span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setRemovePhotoModal(true)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Remover
+                          </Button>
+                        </div>
+                      )}
+                      <FormControl>
+                        <FileUploadStaging
+                          ref={photoUploadRef}
+                          value={field.value ? [field.value] : []}
+                          onChange={(urls: string[]) =>
+                            field.onChange(urls[0] || "")
+                          }
+                          maxFiles={1}
+                          acceptedTypes={[
+                            "image/jpeg",
+                            "image/png",
+                            "image/webp",
+                          ]}
+                          folder="bio"
+                          disabled={isLoading}
+                        />
+                      </FormControl>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -282,12 +371,72 @@ export default function ConfigForm() {
               )}
             </div>
 
-            <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar Configurações
-            </Button>
+            {/* Botões de ação */}
+            <div className="flex gap-4">
+              {hasPendingChanges() && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  className="flex-1"
+                >
+                  Cancelar Alterações
+                </Button>
+              )}
+
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className={hasPendingChanges() ? "flex-1" : "w-full"}
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isLoading ? "Salvando..." : "Salvar Configurações"}
+              </Button>
+            </div>
+
+            {/* Indicador de mudanças pendentes */}
+            {hasPendingChanges() && (
+              <div className="flex items-center gap-2 text-sm text-yellow-600 bg-yellow-50 p-3 rounded-lg">
+                <AlertTriangle className="h-4 w-4" />
+                <span>
+                  Você tem alterações não salvas
+                  {photoUploadRef.current?.hasPendingFiles &&
+                    " e arquivos pendentes"}
+                </span>
+              </div>
+            )}
           </form>
         </Form>
+
+        {/* Modal de Confirmação para Remover Foto */}
+        <Dialog open={removePhotoModal} onOpenChange={setRemovePhotoModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Remover Foto da Bio</DialogTitle>
+              <DialogDescription>
+                Tem certeza que deseja remover a foto da bio?
+                <br />
+                <span className="text-red-600 font-medium">
+                  Esta ação não pode ser desfeita e a foto será removida
+                  permanentemente do storage.
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setRemovePhotoModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button variant="destructive" onClick={handleRemovePhoto}>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Remover Foto
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );

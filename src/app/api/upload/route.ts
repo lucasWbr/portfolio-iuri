@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
       });
 
     if (error) {
-      console.error("Erro no upload:", error);
       return NextResponse.json(
         { success: false, error: error.message },
         { status: 400 }
@@ -70,8 +69,7 @@ export async function POST(req: NextRequest) {
         publicUrl: publicUrlData.publicUrl,
       },
     });
-  } catch (error) {
-    console.error("Erro inesperado no upload:", error);
+  } catch {
     return NextResponse.json(
       { success: false, error: "Erro interno do servidor" },
       { status: 500 }

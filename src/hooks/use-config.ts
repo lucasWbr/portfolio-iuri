@@ -49,8 +49,8 @@ export function useConfig() {
           instagram: data.data.instagram,
         });
       }
-    } catch (error) {
-      console.error("Erro ao carregar configurações:", error);
+    } catch {
+      // Erro ao carregar configurações
     } finally {
       setIsLoading(false);
     }

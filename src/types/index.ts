@@ -26,3 +26,13 @@ export interface Usuario {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface Tag {
+  id: string;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  showInMenu: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}

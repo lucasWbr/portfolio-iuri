@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Portfolio - Artista",
+  title: "Iuri Lang Meira",
   description: "Portfolio profissional de arte e design",
   icons: {
     icon: "/icone-site.png",

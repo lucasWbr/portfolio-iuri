@@ -29,16 +29,28 @@ export default function Header({
     if (showTags && tags.length === 0) {
       async function fetchTags() {
         try {
-          const response = await fetch("/api/trabalhos");
+          const response = await fetch("/api/tags");
           const data = await response.json();
           if (data.success) {
-            const extractedTags =
-              data.data?.flatMap((trabalho: any) => trabalho.tags) || [];
-            const uniqueTags = [...new Set(extractedTags)] as string[];
-            setAllTags(uniqueTags);
+            // Extrair apenas os nomes das tags ativas
+            const tagNames = data.data?.map((tag: any) => tag.name) || [];
+            setAllTags(tagNames);
           }
         } catch (error) {
-          console.error("Erro ao buscar tags:", error);
+          // Fallback para buscar das trabalhos se API de tags falhar
+          try {
+            const response = await fetch("/api/trabalhos");
+            const trabalhoData = await response.json();
+            if (trabalhoData.success) {
+              const extractedTags =
+                trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
+                [];
+              const uniqueTags = [...new Set(extractedTags)] as string[];
+              setAllTags(uniqueTags);
+            }
+          } catch (fallbackError) {
+            // Silenciar erros em produção
+          }
         }
       }
       fetchTags();
@@ -103,9 +115,7 @@ export default function Header({
           </div>
 
           {/* LanguageToggle */}
-          <div className="flex items-center">
-            <LanguageToggle />
-          </div>
+          <LanguageToggle />
         </div>
 
         {/* Mobile Layout */}
@@ -118,18 +128,22 @@ export default function Header({
             <Image
               src="/icone-site.png"
               alt="Logo"
-              width={50}
-              height={50}
+              width={40}
+              height={40}
               className="filter brightness-0 invert"
             />
           </Link>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-white p-2 transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+            className="text-white hover:text-blue-200 transition-colors duration-200"
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </button>
         </div>
 

@@ -58,6 +58,11 @@ const tagTranslations: Record<string, string> = {
   "work in progress": "work in progress",
   wip: "wip",
 
+  // Categorias Específicas do Usuário
+  infantil: "kids",
+  "trabalho pessoal": "personal work",
+  "identidade visual": "visual identity",
+
   // Materiais e Técnicas
   lápis: "pencil",
   carvão: "charcoal",

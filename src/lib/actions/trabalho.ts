@@ -13,8 +13,7 @@ export async function getTrabalhos() {
       orderBy: { createdAt: "desc" },
     });
     return { success: true, data: trabalhos };
-  } catch (error) {
-    console.error("Erro ao buscar trabalhos:", error);
+  } catch {
     return { success: false, error: "Erro ao buscar trabalhos" };
   }
 }
@@ -25,8 +24,7 @@ export async function getTrabalho(id: string) {
       where: { id },
     });
     return { success: true, data: trabalho };
-  } catch (error) {
-    console.error("Erro ao buscar trabalho:", error);
+  } catch {
     return { success: false, error: "Erro ao buscar trabalho" };
   }
 }
@@ -40,12 +38,19 @@ export async function createTrabalho(data: TrabalhoFormData) {
       data: validatedData,
     });
 
+    // Limpeza automática de arquivos órfãos (máximo 30 minutos)
+    try {
+      const { cleanupOrphanedFiles } = await import("@/lib/supabase-cleanup");
+      await cleanupOrphanedFiles(30);
+    } catch {
+      // Limpeza falhou silenciosamente
+    }
+
     revalidatePath("/");
     revalidatePath("/admin/dashboard/trabalhos");
 
     return { success: true, data: trabalho };
   } catch (error) {
-    console.error("Erro ao criar trabalho:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Erro ao criar trabalho",
@@ -72,21 +77,10 @@ export async function updateTrabalho(
           const { deleteMultipleFilesFromStorage } = await import(
             "@/lib/supabase-cleanup"
           );
-          const deleteResult = await deleteMultipleFilesFromStorage(
-            removedFiles
-          );
-          if (deleteResult.success) {
-            console.log(
-              `${deleteResult.deletedCount} arquivo(s) removido(s) do storage`
-            );
-          } else {
-            console.warn(
-              "Alguns arquivos não puderam ser removidos do storage:",
-              deleteResult.errors
-            );
-          }
-        } catch (cleanupError) {
-          console.warn("Erro na limpeza de arquivos:", cleanupError);
+          await deleteMultipleFilesFromStorage(removedFiles);
+          // Arquivos removidos do storage
+        } catch {
+          // Limpeza falhou silenciosamente
         }
       }
     }
@@ -96,13 +90,20 @@ export async function updateTrabalho(
       data: validatedData,
     });
 
+    // Limpeza automática de arquivos órfãos (máximo 30 minutos)
+    try {
+      const { cleanupOrphanedFiles } = await import("@/lib/supabase-cleanup");
+      await cleanupOrphanedFiles(30);
+    } catch {
+      // Limpeza falhou silenciosamente
+    }
+
     revalidatePath("/");
     revalidatePath("/admin/dashboard/trabalhos");
     revalidatePath(`/trabalho/${id}`);
 
     return { success: true, data: trabalho };
   } catch (error) {
-    console.error("Erro ao atualizar trabalho:", error);
     return {
       success: false,
       error:
@@ -134,22 +135,19 @@ export async function deleteTrabalho(id: string) {
         const { deleteMultipleFilesFromStorage } = await import(
           "@/lib/supabase-cleanup"
         );
-        const deleteResult = await deleteMultipleFilesFromStorage(
-          trabalho.image
-        );
-        if (deleteResult.success) {
-          console.log(
-            `${deleteResult.deletedCount} arquivo(s) removido(s) do storage`
-          );
-        } else {
-          console.warn(
-            "Alguns arquivos não puderam ser removidos do storage:",
-            deleteResult.errors
-          );
-        }
-      } catch (cleanupError) {
-        console.warn("Erro na limpeza de arquivos:", cleanupError);
+        await deleteMultipleFilesFromStorage(trabalho.image);
+        // Arquivos removidos do storage
+      } catch {
+        // Limpeza falhou silenciosamente
       }
+    }
+
+    // Limpeza automática adicional após deletar trabalho
+    try {
+      const { cleanupOrphanedFiles } = await import("@/lib/supabase-cleanup");
+      await cleanupOrphanedFiles(5); // Mais agressivo para deleção
+    } catch {
+      // Limpeza falhou silenciosamente
     }
 
     revalidatePath("/");
@@ -157,7 +155,6 @@ export async function deleteTrabalho(id: string) {
 
     return { success: true };
   } catch (error) {
-    console.error("Erro ao deletar trabalho:", error);
     return {
       success: false,
       error:
@@ -176,8 +173,7 @@ export async function getAllTags() {
     const uniqueTags = [...new Set(allTags)].sort();
 
     return { success: true, data: uniqueTags };
-  } catch (error) {
-    console.error("Erro ao buscar tags:", error);
+  } catch {
     return { success: false, error: "Erro ao buscar tags" };
   }
 }

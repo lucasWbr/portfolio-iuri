@@ -9,8 +9,7 @@ export async function GET() {
       success: true,
       data: usuario,
     });
-  } catch (error) {
-    console.error("Erro ao buscar configurações:", error);
+  } catch {
     return NextResponse.json(
       {
         success: false,

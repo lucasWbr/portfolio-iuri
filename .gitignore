@@ -44,3 +44,10 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+#docs
+/docs
+
+# Windows network folders
+**/Ambiente de Rede/
+**/Network Neighborhood/

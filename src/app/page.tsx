@@ -10,7 +10,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
-  const { language, isLoading: languageLoading } = useLanguage();
+  const { isLoading: languageLoading } = useLanguage();
   const [trabalhos, setTrabalhos] = useState<Trabalho[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,20 +18,21 @@ export default function Home() {
   useEffect(() => {
     async function fetchTrabalhos() {
       try {
-        const response = await fetch("/api/trabalhos");
+        // Buscar trabalhos com randomização
+        const response = await fetch("/api/trabalhos?randomize=true");
         const data = await response.json();
 
         if (data.success) {
           setTrabalhos(data.data || []);
 
-          // Extrair tags únicas
+          // Extrair tags únicas dos trabalhos para compatibilidade com Header
           const allTags =
             data.data?.flatMap((trabalho: Trabalho) => trabalho.tags) || [];
           const uniqueTags = [...new Set(allTags)] as string[];
           setTags(uniqueTags);
         }
-      } catch (error) {
-        console.error("Erro ao buscar trabalhos:", error);
+      } catch {
+        // Erro ao buscar trabalhos
       } finally {
         setIsLoading(false);
       }

@@ -3,11 +3,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const trabalho = await prisma.trabalhos.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!trabalho) {
@@ -24,8 +25,7 @@ export async function GET(
       success: true,
       data: trabalho,
     });
-  } catch (error) {
-    console.error("Erro ao buscar trabalho:", error);
+  } catch {
     return NextResponse.json(
       {
         success: false,

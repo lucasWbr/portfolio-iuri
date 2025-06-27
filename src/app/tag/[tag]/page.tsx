@@ -6,21 +6,35 @@ import BackToHome from "@/components/BackToHome";
 import ContactButton from "@/components/ContactButton";
 import { useLanguage } from "@/hooks/use-language";
 import { useState, useEffect } from "react";
-import { Trabalho } from "@/types";
+import { Trabalho, Tag } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 
+// Função para embaralhar array (Fisher-Yates shuffle)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function TagPage() {
-  const { language, isLoading: languageLoading } = useLanguage();
+  const { language, isLoading: languageLoading, translateTag } = useLanguage();
   const params = useParams();
   const [trabalhos, setTrabalhos] = useState<Trabalho[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [tagInfo, setTagInfo] = useState<Tag | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [tagExists, setTagExists] = useState(true);
 
   const decodedTag =
     typeof params.tag === "string" ? decodeURIComponent(params.tag) : "";
+
+  // Traduzir o nome da tag para exibição
+  const displayTagName = translateTag(decodedTag);
 
   useEffect(() => {
     async function fetchTrabalhosByTag() {
@@ -31,18 +45,24 @@ export default function TagPage() {
         const data = await response.json();
 
         if (data.success) {
-          setTrabalhos(data.trabalhos || []);
+          // Aplicar randomização aos trabalhos
+          const trabalhosList = (data.trabalhos || []) as Trabalho[];
+          const randomizedTrabalhos = shuffleArray(trabalhosList);
+          setTrabalhos(randomizedTrabalhos);
           setAllTags(data.allTags || []);
+          setTagInfo(data.tagInfo || null);
 
-          // Verificar se a tag existe
-          if (!data.allTags.includes(decodedTag)) {
+          // Verificar se a tag existe (se há tagInfo ou trabalhos)
+          if (
+            !data.tagInfo &&
+            (!data.trabalhos || data.trabalhos.length === 0)
+          ) {
             setTagExists(false);
           }
         } else {
           setTagExists(false);
         }
       } catch (error) {
-        console.error("Erro ao buscar trabalhos por tag:", error);
         setTagExists(false);
       } finally {
         setIsLoading(false);
@@ -102,14 +122,27 @@ export default function TagPage() {
 
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
-      <Header showTags={true} tags={allTags} currentTag={decodedTag} />
+      <Header
+        showTags={true}
+        tags={allTags.map((tag) => tag.name)}
+        currentTag={decodedTag}
+      />
       <BackToHome />
 
-      {/* Título da página */}
+      {/* Título da página e descrição */}
       <div className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black text-center mb-12 capitalize">
-          {decodedTag}
-        </h1>
+        <div className="text-center mb-12">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black capitalize">
+            {displayTagName}
+          </h1>
+
+          {/* Descrição da tag */}
+          {tagInfo?.description && (
+            <p className="text-lg text-gray-600 mt-4 max-w-3xl mx-auto font-oswald">
+              {tagInfo.description}
+            </p>
+          )}
+        </div>
 
         {/* Grid de trabalhos */}
         {trabalhos.length === 0 ? (

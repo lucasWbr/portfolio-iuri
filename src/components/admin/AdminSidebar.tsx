@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Settings, User, FolderPlus, Briefcase, X } from "lucide-react";
+import { Settings, User, FolderPlus, Briefcase, X, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminSidebarProps {
@@ -21,6 +21,11 @@ const navigation = [
     name: "Trabalhos",
     href: "/admin/dashboard/trabalhos",
     icon: Briefcase,
+  },
+  {
+    name: "Tags",
+    href: "/admin/dashboard/tags",
+    icon: Hash,
   },
   {
     name: "Novo Trabalho",

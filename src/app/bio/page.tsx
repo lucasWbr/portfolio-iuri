@@ -43,7 +43,7 @@ export default function Bio() {
           setTags(uniqueTags);
         }
       } catch (error) {
-        console.error("Erro ao buscar tags:", error);
+        // Erro ao buscar tags
       }
     }
     fetchTags();
@@ -131,7 +131,7 @@ export default function Bio() {
               </h1>
 
               <div className="prose prose-gray max-w-none">
-                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                <p className="text-gray-600 leading-relaxed whitespace-pre-wrap font-oswald">
                   {displayText}
                 </p>
               </div>

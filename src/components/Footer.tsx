@@ -24,20 +24,32 @@ export default function Footer() {
   const { language, translateTag } = useLanguage();
   const [tags, setTags] = useState<string[]>([]);
 
-  // Buscar tags para o footer
+  // Buscar tags para o footer (mesma lógica do Header)
   useEffect(() => {
     async function fetchTags() {
       try {
-        const response = await fetch("/api/trabalhos");
+        const response = await fetch("/api/tags");
         const data = await response.json();
         if (data.success) {
-          const allTags =
-            data.data?.flatMap((trabalho: any) => trabalho.tags) || [];
-          const uniqueTags = [...new Set(allTags)] as string[];
-          setTags(uniqueTags);
+          // Extrair apenas os nomes das tags ativas
+          const tagNames = data.data?.map((tag: any) => tag.name) || [];
+          setTags(tagNames);
         }
       } catch (error) {
-        console.error("Erro ao buscar tags:", error);
+        // Fallback para buscar das trabalhos se API de tags falhar
+        try {
+          const response = await fetch("/api/trabalhos");
+          const trabalhoData = await response.json();
+          if (trabalhoData.success) {
+            const extractedTags =
+              trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
+              [];
+            const uniqueTags = [...new Set(extractedTags)] as string[];
+            setTags(uniqueTags);
+          }
+        } catch (fallbackError) {
+          // Silenciar erros em produção
+        }
       }
     }
     fetchTags();

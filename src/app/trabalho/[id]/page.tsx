@@ -31,7 +31,6 @@ export default function TrabalhoPage() {
           setTrabalho(null);
         }
       } catch (error) {
-        console.error("Erro ao buscar trabalho:", error);
         setTrabalho(null);
       } finally {
         setIsLoading(false);
@@ -72,6 +71,11 @@ export default function TrabalhoPage() {
     trabalho.type === "video" ||
     trabalho.type === "vídeo";
   const isImage = trabalho.type === "image" || trabalho.type === "imagem";
+
+  // Verificar se tem a tag "revista da cerveja"
+  const isRevistaDaCerveja = trabalho.tags.some(
+    (tag) => tag.toLowerCase() === "revista da cerveja"
+  );
 
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
@@ -133,15 +137,43 @@ export default function TrabalhoPage() {
                     alt={`${trabalho.name} - ${index + 1}`}
                     className="w-full h-auto object-contain max-w-full"
                     onError={(e) => {
-                      console.error(
-                        `Erro ao carregar imagem ${index + 1}:`,
-                        imageUrl
-                      );
                       e.currentTarget.style.display = "none";
                     }}
                   />
                 </div>
               ))}
+
+              {/* Layout especial para Revista da Cerveja - miniaturas em linha */}
+              {isRevistaDaCerveja && trabalho.image.length > 1 && (
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden p-4">
+                  <div className="flex flex-wrap gap-4 justify-center">
+                    {trabalho.image.map((imageUrl, index) => (
+                      <div key={`thumb-${index}`} className="flex-shrink-0">
+                        <img
+                          src={imageUrl}
+                          alt={`${trabalho.name} - Miniatura ${index + 1}`}
+                          className="w-32 h-40 object-cover rounded shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                          onClick={() => {
+                            // Scroll para a imagem grande correspondente
+                            const targetElement = document.querySelector(
+                              `img[src="${imageUrl}"]`
+                            );
+                            if (targetElement) {
+                              targetElement.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                            }
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -158,10 +190,6 @@ export default function TrabalhoPage() {
                     alt={`${trabalho.name} - GIF ${index + 1}`}
                     className="max-w-full h-auto object-contain rounded"
                     onError={(e) => {
-                      console.error(
-                        `Erro ao carregar GIF ${index + 1}:`,
-                        gifUrl
-                      );
                       e.currentTarget.style.display = "none";
                     }}
                   />
@@ -178,7 +206,7 @@ export default function TrabalhoPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 {language === "en" ? "About this work" : "Sobre este trabalho"}
               </h2>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap font-oswald">
                 {displayText}
               </p>
             </div>
