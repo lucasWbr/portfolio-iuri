@@ -2,6 +2,7 @@
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BackToHome from "@/components/BackToHome";
 import ContactButton from "@/components/ContactButton";
 import { useLanguage } from "@/hooks/use-language";
 import { useConfig } from "@/hooks/use-config";
@@ -29,29 +30,42 @@ export default function Bio() {
 
   const isLoading = languageLoading || configLoading;
 
-  // Buscar tags para mostrar no header
+  // Buscar apenas tags ativas para mostrar no header
   useEffect(() => {
-    async function fetchTags() {
+    async function fetchActiveTags() {
       try {
-        const response = await fetch("/api/trabalhos");
+        const response = await fetch("/api/tags");
         const data = await response.json();
         if (data.success) {
-          const allTags =
-            data.data?.flatMap((trabalho: any) => trabalho.tags) || [];
-          const uniqueTags = [...new Set(allTags)] as string[];
-          setTags(uniqueTags);
+          // Extrair apenas os nomes das tags ativas
+          const activeTagNames = data.data?.map((tag: any) => tag.name) || [];
+          setTags(activeTagNames);
         }
       } catch (error) {
-        // Erro ao buscar tags
+        // Fallback para buscar das trabalhos se API de tags falhar
+        try {
+          const response = await fetch("/api/trabalhos");
+          const trabalhoData = await response.json();
+          if (trabalhoData.success) {
+            const allTags =
+              trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
+              [];
+            const uniqueTags = [...new Set(allTags)] as string[];
+            setTags(uniqueTags);
+          }
+        } catch (fallbackError) {
+          // Erro ao buscar tags
+        }
       }
     }
-    fetchTags();
+    fetchActiveTags();
   }, []);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} tags={tags} />
+        <BackToHome />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
             <div className="flex flex-col md:flex-row gap-8 items-start animate-pulse">
@@ -76,6 +90,7 @@ export default function Bio() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} tags={tags} />
+        <BackToHome />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
             <p className="text-gray-500 text-lg">
@@ -98,6 +113,7 @@ export default function Bio() {
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
       <Header showTags={true} tags={tags} />
+      <BackToHome />
 
       <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
         <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
