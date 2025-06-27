@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Mail, Phone, X, ExternalLink } from "lucide-react";
+import { MessageCircle, Mail, Phone, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { useConfig } from "@/hooks/use-config";
 import { useLanguage } from "@/hooks/use-language";
-import Link from "next/link";
 
 // Componente customizado do ícone Behance
 const BehanceIcon = ({ className }: { className?: string }) => (

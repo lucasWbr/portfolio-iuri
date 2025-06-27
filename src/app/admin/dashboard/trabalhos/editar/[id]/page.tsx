@@ -84,7 +84,7 @@ export default function EditarTrabalho() {
               Editar Trabalho
             </h1>
             <p className="text-gray-600">
-              Atualize as informações do trabalho "{trabalho.name}"
+              Atualize as informações do trabalho &quot;{trabalho.name}&quot;
             </p>
           </div>
         </div>

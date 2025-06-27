@@ -193,7 +193,7 @@ export default function TrabalhosList() {
             <DialogTitle>Deletar Trabalho</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja deletar o trabalho{" "}
-              <strong>"{deleteModal.trabalho?.name}"</strong>?
+              <strong>&quot;{deleteModal.trabalho?.name}&quot;</strong>?
               <br />
               <span className="text-red-600 font-medium">
                 Esta ação não pode ser desfeita e todos os arquivos associados

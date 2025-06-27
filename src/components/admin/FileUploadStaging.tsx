@@ -402,7 +402,7 @@ const FileUploadStaging = forwardRef<
               <DialogTitle>Remover Arquivo</DialogTitle>
               <DialogDescription>
                 Tem certeza que deseja remover{" "}
-                <strong>"{removeModal.fileName}"</strong>?
+                <strong>&quot;{removeModal.fileName}&quot;</strong>?
                 <br />
                 {removeModal.type === "existing" ? (
                   <span className="text-red-600 font-medium">

@@ -448,7 +448,8 @@ export default function TagsList() {
                       <AlertDialogHeader>
                         <AlertDialogTitle>Deletar Tag</AlertDialogTitle>
                         <AlertDialogDescription>
-                          Tem certeza que deseja deletar a tag "{tag.name}"?
+                          Tem certeza que deseja deletar a tag &quot;{tag.name}
+                          &quot;?
                           {usageCounts[tag.name] > 0 && (
                             <span className="text-red-600 block mt-2">
                               Esta tag está sendo usada em{" "}
