@@ -1,28 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Usuario } from "@/types";
 
 interface Config {
   name: string;
   text: string;
-  behance?: string;
-  linkedin?: string;
-  facebook?: string;
-  instagram?: string;
-  colorHeader: string;
-  colorBackgroundIndex: string;
-  colorBackgroundWorks: string;
-  font: string;
+  textEn?: string | null;
+  fotoBio?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  behance?: string | null;
+  linkedin?: string | null;
+  facebook?: string | null;
+  instagram?: string | null;
 }
 
 const defaultConfig: Config = {
   name: "Portfólio",
   text: "Designer e desenvolvedor criativo",
-  colorHeader: "#ffffff",
-  colorBackgroundIndex: "#f8f9fa",
-  colorBackgroundWorks: "#ffffff",
-  font: "Inter",
+  textEn: null,
 };
 
 export function useConfig() {
@@ -43,18 +39,14 @@ export function useConfig() {
         setConfig({
           name: data.data.name || defaultConfig.name,
           text: data.data.text || defaultConfig.text,
+          textEn: data.data.textEn,
+          fotoBio: data.data.fotoBio,
+          email: data.data.email,
+          telefone: data.data.telefone,
           behance: data.data.behance,
           linkedin: data.data.linkedin,
           facebook: data.data.facebook,
           instagram: data.data.instagram,
-          colorHeader: data.data.colorHeader || defaultConfig.colorHeader,
-          colorBackgroundIndex:
-            data.data.colorBackgroundIndex ||
-            defaultConfig.colorBackgroundIndex,
-          colorBackgroundWorks:
-            data.data.colorBackgroundWorks ||
-            defaultConfig.colorBackgroundWorks,
-          font: data.data.font || defaultConfig.font,
         });
       }
     } catch (error) {
@@ -67,19 +59,21 @@ export function useConfig() {
   useEffect(() => {
     loadConfig();
 
-    // Adicionar listener para mudanças no localStorage (cross-tab communication)
-    const handleStorageChange = () => {
+    // Listener para recarregar quando configurações são atualizadas
+    const handleConfigUpdate = () => {
       loadConfig();
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("config-updated", handleStorageChange);
+    window.addEventListener("config-updated", handleConfigUpdate);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("config-updated", handleStorageChange);
+      window.removeEventListener("config-updated", handleConfigUpdate);
     };
   }, []);
 
-  return { config, isLoading, refetch: loadConfig };
+  return {
+    config,
+    isLoading,
+    reload: loadConfig,
+  };
 }

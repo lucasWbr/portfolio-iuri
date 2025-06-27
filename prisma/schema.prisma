@@ -10,14 +10,16 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Trabalhos {
   id    String   @id @default(cuid())
   name  String
   text  String?
+  textEn String?
   image String[]
   tags  String[]
   type  String
@@ -32,14 +34,14 @@ model Usuario {
   id                      String @id @default(cuid())
   name                    String
   text                    String
+  textEn                  String?
+  fotoBio                 String?
+  email                   String?
+  telefone                String?
   behance                 String?
   linkedin                String?
   facebook                String?
   instagram               String?
-  colorHeader             String @default("#ffffff")
-  colorBackgroundIndex    String @default("#f8f9fa")
-  colorBackgroundWorks    String @default("#ffffff")
-  font                    String @default("Inter")
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 

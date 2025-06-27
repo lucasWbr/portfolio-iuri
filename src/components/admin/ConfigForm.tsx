@@ -31,15 +31,30 @@ import {
 import { usuarioSchema, type UsuarioFormData } from "@/lib/validations/usuario";
 import { updateUsuario, getUsuario } from "@/lib/actions/usuario";
 import { Loader2 } from "lucide-react";
+import FileUpload from "./FileUpload";
 
-const fonts = [
-  { value: "Inter", label: "Inter" },
-  { value: "Roboto", label: "Roboto" },
-  { value: "Open Sans", label: "Open Sans" },
-  { value: "Lato", label: "Lato" },
-  { value: "Montserrat", label: "Montserrat" },
-  { value: "Poppins", label: "Poppins" },
-];
+// Função para formatar telefone brasileiro
+const formatTelefone = (value: string): string => {
+  // Remove tudo que não é número
+  const numbers = value.replace(/\D/g, "");
+
+  // Limita a 11 dígitos
+  const limitedNumbers = numbers.slice(0, 11);
+
+  // Aplica formatação
+  if (limitedNumbers.length <= 2) return limitedNumbers;
+  if (limitedNumbers.length <= 6)
+    return `(${limitedNumbers.slice(0, 2)}) ${limitedNumbers.slice(2)}`;
+  if (limitedNumbers.length <= 10)
+    return `(${limitedNumbers.slice(0, 2)}) ${limitedNumbers.slice(
+      2,
+      6
+    )}-${limitedNumbers.slice(6)}`;
+  return `(${limitedNumbers.slice(0, 2)}) ${limitedNumbers.slice(
+    2,
+    7
+  )}-${limitedNumbers.slice(7)}`;
+};
 
 export default function ConfigForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -49,14 +64,14 @@ export default function ConfigForm() {
     defaultValues: {
       name: "",
       text: "",
+      textEn: "",
+      fotoBio: "",
+      email: "",
+      telefone: "",
       behance: "",
       linkedin: "",
       facebook: "",
       instagram: "",
-      colorHeader: "#ffffff",
-      colorBackgroundIndex: "#f8f9fa",
-      colorBackgroundWorks: "#ffffff",
-      font: "Inter",
     },
   });
 
@@ -69,14 +84,14 @@ export default function ConfigForm() {
         const formData = {
           name: result.data.name,
           text: result.data.text,
+          textEn: result.data.textEn || "",
+          fotoBio: result.data.fotoBio || "",
+          email: result.data.email || "",
+          telefone: result.data.telefone || "",
           behance: result.data.behance || "",
           linkedin: result.data.linkedin || "",
           facebook: result.data.facebook || "",
           instagram: result.data.instagram || "",
-          colorHeader: result.data.colorHeader,
-          colorBackgroundIndex: result.data.colorBackgroundIndex,
-          colorBackgroundWorks: result.data.colorBackgroundWorks,
-          font: result.data.font,
         };
         form.reset(formData);
       }
@@ -151,6 +166,92 @@ export default function ConfigForm() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="textEn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição em Inglês (Opcional)</FormLabel>
+                    <FormControl>
+                      <textarea
+                        {...field}
+                        className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-md resize-vertical"
+                        placeholder="Tell about yourself and your work..."
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="fotoBio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Foto da Bio (Opcional)</FormLabel>
+                    <FormControl>
+                      <FileUpload
+                        value={field.value ? [field.value] : []}
+                        onChange={(urls) => field.onChange(urls[0] || "")}
+                        maxFiles={1}
+                        acceptedTypes={[
+                          "image/jpeg",
+                          "image/png",
+                          "image/webp",
+                        ]}
+                        folder="bio"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Informações de Contato */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Informações de Contato</h3>
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="seu@email.com"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="telefone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="(11) 99999-9999"
+                        onChange={(e) => {
+                          const formatted = formatTelefone(e.target.value);
+                          field.onChange(formatted);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Redes Sociais */}
@@ -179,116 +280,6 @@ export default function ConfigForm() {
                   />
                 )
               )}
-            </div>
-
-            {/* Aparência */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Aparência</h3>
-
-              <FormField
-                control={form.control}
-                name="font"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fonte</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma fonte" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {fonts.map((font) => (
-                          <SelectItem key={font.value} value={font.value}>
-                            {font.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="colorHeader"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor do Header</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-2">
-                          <Input
-                            {...field}
-                            type="color"
-                            className="w-16 h-10 p-1 border"
-                          />
-                          <Input
-                            {...field}
-                            placeholder="#ffffff"
-                            className="flex-1"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="colorBackgroundIndex"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fundo da Página Inicial</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-2">
-                          <Input
-                            {...field}
-                            type="color"
-                            className="w-16 h-10 p-1 border"
-                          />
-                          <Input
-                            {...field}
-                            placeholder="#f8f9fa"
-                            className="flex-1"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="colorBackgroundWorks"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fundo dos Trabalhos</FormLabel>
-                      <FormControl>
-                        <div className="flex gap-2">
-                          <Input
-                            {...field}
-                            type="color"
-                            className="w-16 h-10 p-1 border"
-                          />
-                          <Input
-                            {...field}
-                            placeholder="#ffffff"
-                            className="flex-1"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
             </div>
 
             <Button type="submit" disabled={isLoading} className="w-full">

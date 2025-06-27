@@ -39,9 +39,10 @@ import {
   updateTrabalho,
   getAllTags,
 } from "@/lib/actions/trabalho";
-import { Loader2, X, Plus } from "lucide-react";
+import { Loader2, X, Plus, Download } from "lucide-react";
 import FileUpload from "./FileUpload";
 import type { Trabalho } from "@/types";
+import { fetchYouTubeThumbnail, isValidYouTubeUrl } from "@/lib/youtube-utils";
 
 interface TrabalhoFormProps {
   trabalho?: Trabalho;
@@ -61,6 +62,7 @@ export default function TrabalhoForm({
   const [isLoading, setIsLoading] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
+  const [isLoadingThumbnail, setIsLoadingThumbnail] = useState(false);
 
   const isEditing = !!trabalho;
 
@@ -69,6 +71,7 @@ export default function TrabalhoForm({
     defaultValues: {
       name: trabalho?.name || "",
       text: trabalho?.text || "",
+      textEn: trabalho?.textEn || "",
       type: (trabalho?.type as "imagem" | "gif" | "youtube") || "imagem",
       tags: trabalho?.tags || [],
       image: trabalho?.image || [],
@@ -95,7 +98,8 @@ export default function TrabalhoForm({
     try {
       let result;
       if (isEditing) {
-        result = await updateTrabalho(trabalho.id, data);
+        // Passar dados antigos para a server action fazer a limpeza
+        result = await updateTrabalho(trabalho.id, data, trabalho.image);
       } else {
         result = await createTrabalho(data);
       }
@@ -144,6 +148,31 @@ export default function TrabalhoForm({
     if (!watchTags.includes(tag)) {
       const updatedTags = [...watchTags, tag];
       form.setValue("tags", updatedTags);
+    }
+  };
+
+  const handleYouTubeThumbnail = async () => {
+    const youtubeUrl = form.getValues("youtubeUrl");
+    if (!youtubeUrl || !isValidYouTubeUrl(youtubeUrl)) {
+      toast.error("Por favor, insira uma URL válida do YouTube primeiro");
+      return;
+    }
+
+    setIsLoadingThumbnail(true);
+    try {
+      const thumbnailUrl = await fetchYouTubeThumbnail(youtubeUrl);
+      if (thumbnailUrl) {
+        const currentImages = form.getValues("image") || [];
+        // Adiciona a thumbnail no início da lista
+        form.setValue("image", [thumbnailUrl, ...currentImages]);
+        toast.success("Thumbnail do YouTube carregada com sucesso!");
+      } else {
+        toast.error("Não foi possível carregar a thumbnail do YouTube");
+      }
+    } catch (error) {
+      toast.error("Erro ao carregar thumbnail do YouTube");
+    } finally {
+      setIsLoadingThumbnail(false);
     }
   };
 
@@ -199,6 +228,24 @@ export default function TrabalhoForm({
 
               <FormField
                 control={form.control}
+                name="textEn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição em Inglês (Opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Describe the work in English..."
+                        className="min-h-[100px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="type"
                 render={({ field }) => (
                   <FormItem>
@@ -234,7 +281,11 @@ export default function TrabalhoForm({
               {watchTags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {watchTags.map((tag) => (
-                    <Badge key={tag} variant="default" className="gap-1">
+                    <Badge
+                      key={tag}
+                      variant="default"
+                      className="gap-1 capitalize"
+                    >
                       {tag}
                       <Button
                         type="button"
@@ -279,7 +330,7 @@ export default function TrabalhoForm({
                         <Badge
                           key={tag}
                           variant="outline"
-                          className="cursor-pointer hover:bg-gray-100"
+                          className="cursor-pointer hover:bg-gray-100 capitalize"
                           onClick={() => addExistingTag(tag)}
                         >
                           {tag}
@@ -304,7 +355,7 @@ export default function TrabalhoForm({
                       <FileUpload
                         value={field.value}
                         onChange={field.onChange}
-                        maxFiles={watchType === "gif" ? 3 : 10}
+                        maxFiles={watchType === "gif" ? 3 : 30}
                         acceptedTypes={
                           watchType === "gif"
                             ? ["image/gif"]
@@ -320,23 +371,73 @@ export default function TrabalhoForm({
             )}
 
             {watchType === "youtube" && (
-              <FormField
-                control={form.control}
-                name="youtubeUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL do YouTube</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="url"
-                        placeholder="https://www.youtube.com/watch?v=..."
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="youtubeUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>URL do YouTube</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="url"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Thumbnail para YouTube */}
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Imagem de Apresentação</FormLabel>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={handleYouTubeThumbnail}
+                            disabled={isLoadingThumbnail}
+                            className="flex-1"
+                          >
+                            {isLoadingThumbnail ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="mr-2 h-4 w-4" />
+                            )}
+                            {isLoadingThumbnail
+                              ? "Carregando..."
+                              : "Buscar Thumbnail Automática"}
+                          </Button>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          ou faça upload manual de uma imagem personalizada:
+                        </div>
+                        <FormControl>
+                          <FileUpload
+                            value={field.value}
+                            onChange={field.onChange}
+                            maxFiles={1}
+                            acceptedTypes={[
+                              "image/jpeg",
+                              "image/png",
+                              "image/webp",
+                            ]}
+                            folder="youtube-thumbnails"
+                          />
+                        </FormControl>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             )}
 
             <Button type="submit" disabled={isLoading} className="w-full">

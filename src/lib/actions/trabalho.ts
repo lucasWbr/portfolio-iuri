@@ -53,10 +53,43 @@ export async function createTrabalho(data: TrabalhoFormData) {
   }
 }
 
-export async function updateTrabalho(id: string, data: TrabalhoFormData) {
+export async function updateTrabalho(
+  id: string,
+  data: TrabalhoFormData,
+  oldImages?: string[]
+) {
   try {
     // Validar dados
     const validatedData = trabalhoSchema.parse(data);
+
+    // Se oldImages foi passado, identificar arquivos removidos
+    if (oldImages && oldImages.length > 0) {
+      const newImages = data.image || [];
+      const removedFiles = oldImages.filter((url) => !newImages.includes(url));
+
+      if (removedFiles.length > 0) {
+        try {
+          const { deleteMultipleFilesFromStorage } = await import(
+            "@/lib/supabase-cleanup"
+          );
+          const deleteResult = await deleteMultipleFilesFromStorage(
+            removedFiles
+          );
+          if (deleteResult.success) {
+            console.log(
+              `${deleteResult.deletedCount} arquivo(s) removido(s) do storage`
+            );
+          } else {
+            console.warn(
+              "Alguns arquivos não puderam ser removidos do storage:",
+              deleteResult.errors
+            );
+          }
+        } catch (cleanupError) {
+          console.warn("Erro na limpeza de arquivos:", cleanupError);
+        }
+      }
+    }
 
     const trabalho = await prisma.trabalhos.update({
       where: { id },
@@ -80,9 +113,44 @@ export async function updateTrabalho(id: string, data: TrabalhoFormData) {
 
 export async function deleteTrabalho(id: string) {
   try {
+    // Buscar o trabalho antes de deletar para obter as imagens
+    const trabalho = await prisma.trabalhos.findUnique({
+      where: { id },
+      select: { image: true },
+    });
+
+    if (!trabalho) {
+      return { success: false, error: "Trabalho não encontrado" };
+    }
+
+    // Deletar do banco de dados
     await prisma.trabalhos.delete({
       where: { id },
     });
+
+    // Deletar arquivos do storage se existirem
+    if (trabalho.image && trabalho.image.length > 0) {
+      try {
+        const { deleteMultipleFilesFromStorage } = await import(
+          "@/lib/supabase-cleanup"
+        );
+        const deleteResult = await deleteMultipleFilesFromStorage(
+          trabalho.image
+        );
+        if (deleteResult.success) {
+          console.log(
+            `${deleteResult.deletedCount} arquivo(s) removido(s) do storage`
+          );
+        } else {
+          console.warn(
+            "Alguns arquivos não puderam ser removidos do storage:",
+            deleteResult.errors
+          );
+        }
+      } catch (cleanupError) {
+        console.warn("Erro na limpeza de arquivos:", cleanupError);
+      }
+    }
 
     revalidatePath("/");
     revalidatePath("/admin/dashboard/trabalhos");

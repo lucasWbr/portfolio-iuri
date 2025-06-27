@@ -1,10 +1,15 @@
+"use client";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { prisma } from "@/lib/prisma";
-import { Usuario } from "@/types";
-import Image from "next/image";
+import BackToHome from "@/components/BackToHome";
+import ContactButton from "@/components/ContactButton";
+import { useLanguage } from "@/hooks/use-language";
+import { useConfig } from "@/hooks/use-config";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Linkedin, Facebook, Instagram } from "lucide-react";
+import Image from "next/image";
 
 // Componente customizado do ícone Behance (já que não existe no Lucide)
 const BehanceIcon = ({ className }: { className?: string }) => (
@@ -18,25 +23,62 @@ const BehanceIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Buscar dados do usuário
-async function getUsuario(): Promise<Usuario | null> {
-  try {
-    const usuario = (await prisma.usuario.findFirst()) as Usuario | null;
-    return usuario;
-  } catch (error) {
-    console.error("Erro ao buscar usuário:", error);
-    return null;
-  }
-}
+export default function Bio() {
+  const { language, isLoading: languageLoading } = useLanguage();
+  const { config, isLoading: configLoading } = useConfig();
+  const [tags, setTags] = useState<string[]>([]);
 
-export default async function Bio() {
-  const usuario = await getUsuario();
+  const isLoading = languageLoading || configLoading;
 
-  if (!usuario) {
+  // Buscar tags para mostrar no header
+  useEffect(() => {
+    async function fetchTags() {
+      try {
+        const response = await fetch("/api/trabalhos");
+        const data = await response.json();
+        if (data.success) {
+          const allTags =
+            data.data?.flatMap((trabalho: any) => trabalho.tags) || [];
+          const uniqueTags = [...new Set(allTags)] as string[];
+          setTags(uniqueTags);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar tags:", error);
+      }
+    }
+    fetchTags();
+  }, []);
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <main className="max-w-4xl mx-auto px-6 py-16">
+      <div className="min-h-screen bg-index-custom flex flex-col">
+        <Header showTags={true} tags={tags} currentPage="bio" />
+        <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
+          <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
+            <div className="flex flex-col md:flex-row gap-8 items-start animate-pulse">
+              <div className="flex-shrink-0">
+                <div className="w-48 h-48 bg-gray-200 rounded-full"></div>
+              </div>
+              <div className="flex-1">
+                <div className="h-8 bg-gray-200 rounded mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!config) {
+    return (
+      <div className="min-h-screen bg-index-custom flex flex-col">
+        <Header showTags={true} tags={tags} currentPage="bio" />
+        <BackToHome />
+        <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
             <p className="text-gray-500 text-lg">
               Informações do artista não encontradas.
@@ -46,44 +88,59 @@ export default async function Bio() {
             </p>
           </div>
         </main>
+        <Footer />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-index-custom">
-      <Header />
+  // Escolher texto baseado no idioma
+  const displayText =
+    language === "en" && config.textEn ? config.textEn : config.text;
 
-      <main className="max-w-4xl mx-auto px-6 py-16">
+  return (
+    <div className="min-h-screen bg-index-custom flex flex-col">
+      <Header showTags={true} tags={tags} currentPage="bio" />
+      <BackToHome />
+
+      <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
         <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Foto do artista */}
             <div className="flex-shrink-0">
               <div className="w-48 h-48 bg-gray-200 rounded-full overflow-hidden">
-                {/* Placeholder para foto - pode ser substituído por imagem real */}
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <span className="text-4xl font-bold">{usuario.name[0]}</span>
-                </div>
+                {config.fotoBio ? (
+                  <Image
+                    src={config.fotoBio}
+                    alt={`Foto de ${config.name}`}
+                    width={192}
+                    height={192}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <span className="text-4xl font-bold">{config.name[0]}</span>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Informações do artista */}
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-6">
-                {usuario.name}
+                {config.name}
               </h1>
 
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
-                  {usuario.text}
+                  {displayText}
                 </p>
               </div>
 
               {/* Redes sociais */}
               <div className="flex gap-4 mt-8">
-                {usuario.behance && (
+                {config.behance && (
                   <Link
-                    href={usuario.behance}
+                    href={config.behance}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
@@ -92,9 +149,9 @@ export default async function Bio() {
                   </Link>
                 )}
 
-                {usuario.linkedin && (
+                {config.linkedin && (
                   <Link
-                    href={usuario.linkedin}
+                    href={config.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
@@ -103,9 +160,9 @@ export default async function Bio() {
                   </Link>
                 )}
 
-                {usuario.facebook && (
+                {config.facebook && (
                   <Link
-                    href={usuario.facebook}
+                    href={config.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
@@ -114,9 +171,9 @@ export default async function Bio() {
                   </Link>
                 )}
 
-                {usuario.instagram && (
+                {config.instagram && (
                   <Link
-                    href={usuario.instagram}
+                    href={config.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors duration-200"
@@ -131,6 +188,7 @@ export default async function Bio() {
       </main>
 
       <Footer />
+      <ContactButton />
     </div>
   );
 }

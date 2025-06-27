@@ -7,6 +7,14 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Edit, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { getTrabalhos, deleteTrabalho } from "@/lib/actions/trabalho";
 import type { Trabalho } from "@/types";
@@ -15,6 +23,10 @@ export default function TrabalhosList() {
   const [trabalhos, setTrabalhos] = useState<Trabalho[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    trabalho: Trabalho | null;
+  }>({ isOpen: false, trabalho: null });
 
   useEffect(() => {
     loadTrabalhos();
@@ -36,17 +48,26 @@ export default function TrabalhosList() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Tem certeza que deseja deletar este trabalho?")) {
-      return;
-    }
+  function openDeleteModal(trabalho: Trabalho) {
+    setDeleteModal({ isOpen: true, trabalho });
+  }
 
+  function closeDeleteModal() {
+    setDeleteModal({ isOpen: false, trabalho: null });
+  }
+
+  async function confirmDelete() {
+    if (!deleteModal.trabalho) return;
+
+    const id = deleteModal.trabalho.id;
     setDeletingId(id);
+
     try {
       const result = await deleteTrabalho(id);
       if (result.success) {
         toast.success("Trabalho deletado com sucesso!");
         setTrabalhos((prev) => prev.filter((t) => t.id !== id));
+        closeDeleteModal();
       } else {
         toast.error(result.error || "Erro ao deletar trabalho");
       }
@@ -119,7 +140,11 @@ export default function TrabalhosList() {
                   {trabalho.type}
                 </Badge>
                 {trabalho.tags.slice(0, 2).map((tag: string) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="text-xs capitalize"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -144,7 +169,7 @@ export default function TrabalhosList() {
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDelete(trabalho.id)}
+                  onClick={() => openDeleteModal(trabalho)}
                   disabled={deletingId === trabalho.id}
                   className="flex-1"
                 >
@@ -160,6 +185,45 @@ export default function TrabalhosList() {
           </CardContent>
         </Card>
       ))}
+
+      {/* Modal de Confirmação */}
+      <Dialog open={deleteModal.isOpen} onOpenChange={closeDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Deletar Trabalho</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja deletar o trabalho{" "}
+              <strong>"{deleteModal.trabalho?.name}"</strong>?
+              <br />
+              <span className="text-red-600 font-medium">
+                Esta ação não pode ser desfeita e todos os arquivos associados
+                serão removidos.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={closeDeleteModal}
+              disabled={!!deletingId}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={!!deletingId}
+            >
+              {deletingId ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Deletar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

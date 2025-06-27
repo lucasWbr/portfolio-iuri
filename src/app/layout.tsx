@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/sonner";
-import DynamicStyles from "@/components/DynamicStyles";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: "Portfolio - Artista",
   description: "Portfolio profissional de arte e design",
+  icons: {
+    icon: "/icone-site.png",
+    shortcut: "/icone-site.png",
+    apple: "/icone-site.png",
+  },
 };
 
 export default function RootLayout({
@@ -23,8 +21,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="pt-BR">
-        <body className={`${inter.variable} font-sans antialiased`}>
-          <DynamicStyles />
+        <body className="font-sans antialiased">
           {children}
           <Toaster />
         </body>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { Home, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface AdminHeaderProps {
   onToggleSidebar?: () => void;
@@ -25,9 +26,13 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
 
           {/* Logo */}
           <Link href="/admin/dashboard" className="flex items-center">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
+            <Image
+              src="/icone-site.png"
+              alt="Logo Admin"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
             <span className="ml-2 text-lg font-semibold text-gray-900 hidden sm:block">
               Admin
             </span>
