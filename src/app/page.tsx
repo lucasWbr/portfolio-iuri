@@ -45,18 +45,13 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white shadow-sm overflow-hidden animate-pulse"
-              >
-                <div className="w-full aspect-square bg-gray-200"></div>
-                <div className="p-4">
-                  <div className="h-6 bg-gray-200 rounded"></div>
-                </div>
-              </div>
+                className="relative aspect-square w-full min-h-[260px] md:min-h-[340px] lg:min-h-[420px] bg-gray-200 animate-pulse"
+              />
             ))}
           </div>
         </main>

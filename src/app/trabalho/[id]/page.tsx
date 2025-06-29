@@ -30,7 +30,7 @@ export default function TrabalhoPage() {
         } else {
           setTrabalho(null);
         }
-      } catch (error) {
+      } catch {
         setTrabalho(null);
       } finally {
         setIsLoading(false);

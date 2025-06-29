@@ -33,22 +33,24 @@ export default function Footer() {
         const data = await response.json();
         if (data.success) {
           // Extrair apenas os nomes das tags ativas
-          const tagNames = data.data?.map((tag: any) => tag.name) || [];
+          const tagNames =
+            data.data?.map((tag: { name: string }) => tag.name) || [];
           setTags(tagNames);
         }
-      } catch (error) {
+      } catch {
         // Fallback para buscar das trabalhos se API de tags falhar
         try {
           const response = await fetch("/api/trabalhos");
           const trabalhoData = await response.json();
           if (trabalhoData.success) {
             const extractedTags =
-              trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
-              [];
+              trabalhoData.data?.flatMap(
+                (trabalho: { tags: string[] }) => trabalho.tags
+              ) || [];
             const uniqueTags = [...new Set(extractedTags)] as string[];
             setTags(uniqueTags);
           }
-        } catch (fallbackError) {
+        } catch {
           // Silenciar erros em produção
         }
       }
@@ -57,11 +59,6 @@ export default function Footer() {
   }, []);
 
   if (!config) return null;
-
-  // Função para capitalizar o nome do artista
-  const capitalizeWords = (str: string) => {
-    return str.replace(/\b\w/g, (l) => l.toUpperCase());
-  };
 
   const copyrightText =
     language === "en"

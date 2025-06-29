@@ -24,7 +24,7 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const { language, translateTag, isLoading: languageLoading } = useLanguage();
+  const { language, translateTag } = useLanguage();
 
   // Buscar tags se não foram fornecidas
   useEffect(() => {
@@ -35,7 +35,8 @@ export default function Header({
           const data = await response.json();
           if (data.success) {
             // Extrair apenas os nomes das tags ativas
-            const tagNames = data.data?.map((tag: any) => tag.name) || [];
+            const tagNames =
+              data.data?.map((tag: { name: string }) => tag.name) || [];
             setAllTags(tagNames);
           }
         } catch (error) {
@@ -45,8 +46,9 @@ export default function Header({
             const trabalhoData = await response.json();
             if (trabalhoData.success) {
               const extractedTags =
-                trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
-                [];
+                trabalhoData.data?.flatMap(
+                  (trabalho: { tags: string[] }) => trabalho.tags
+                ) || [];
               const uniqueTags = [...new Set(extractedTags)] as string[];
               setAllTags(uniqueTags);
             }
@@ -159,40 +161,9 @@ export default function Header({
                     ? "font-bold font-archivo-narrow"
                     : "font-normal"
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Bio
               </Link>
-
-              {/* Tags */}
-              {showTags && (
-                <>
-                  <div className="text-blue-900 text-sm font-medium">
-                    {language === "en" ? "Categories:" : "Categorias:"}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {displayTags.map((tag) => (
-                      <Link
-                        key={tag}
-                        href={`/tag/${encodeURIComponent(tag)}`}
-                        className={`text-sm font-archivo-narrow capitalize transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
-                          tag === currentTag
-                            ? "font-bold font-archivo-narrow"
-                            : "font-normal"
-                        }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {translateTag(tag)}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {/* Language Toggle */}
-              <div className="pt-2">
-                <LanguageToggle className="text-[#0041FF] bg-transparent border-none shadow-none" />
-              </div>
             </div>
           </div>
         )}
