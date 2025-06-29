@@ -69,7 +69,7 @@ export default function Header({
     <header className="w-full bg-index-custom px-6 py-4">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout */}
-        <div className="hidden md:flex justify-between items-center">
+        <div className="hidden sm:flex justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
@@ -122,7 +122,7 @@ export default function Header({
         </div>
 
         {/* Mobile Layout */}
-        <div className="md:hidden flex justify-between items-center">
+        <div className="flex sm:hidden justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
@@ -131,8 +131,8 @@ export default function Header({
             <Image
               src="/icone-sitevazado.gif"
               alt="Logo"
-              width={40}
-              height={40}
+              width={56}
+              height={56}
             />
           </Link>
 
@@ -151,7 +151,7 @@ export default function Header({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-blue-600">
+          <div className="mt-4 pb-4 border-t border-blue-600 sm:hidden">
             <div className="flex flex-col space-y-4 pt-4">
               {/* Bio */}
               <Link
@@ -164,6 +164,28 @@ export default function Header({
               >
                 Bio
               </Link>
+              {/* Tags */}
+              {showTags && displayTags.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {displayTags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/tag/${encodeURIComponent(tag)}`}
+                      className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
+                        tag === currentTag
+                          ? "font-bold font-archivo-narrow"
+                          : "font-normal"
+                      }`}
+                    >
+                      {translateTag(tag)}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {/* Language Toggle */}
+              <div className="pt-2">
+                <LanguageToggle className="text-[#0041FF] bg-transparent border-none shadow-none" />
+              </div>
             </div>
           </div>
         )}
