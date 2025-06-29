@@ -44,7 +44,6 @@ export default function TrabalhoPage() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <BackToHome />
         <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded mb-4 w-3/4 mx-auto"></div>
@@ -80,17 +79,18 @@ export default function TrabalhoPage() {
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
       <Header />
-      <BackToHome />
+      <div className="relative flex items-center w-full max-w-6xl mx-auto px-6 pt-8 pb-2 mb-4">
+        <div className="absolute left-0">
+          <BackToHome />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-bold font-archivo-narrow text-[#0041FF] uppercase mx-auto inline-block text-center">
+          {trabalho.name}
+        </h1>
+      </div>
 
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
         {/* Título centralizado */}
         <div className="mb-8">
-          <div className="text-center mb-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-black uppercase">
-              {trabalho.name}
-            </h1>
-          </div>
-
           {/* Tags à esquerda */}
           {trabalho.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -206,7 +206,7 @@ export default function TrabalhoPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
                 {language === "en" ? "About this work" : "Sobre este trabalho"}
               </h2>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap font-oswald">
+              <p className="text-lg font-archivo-narrow text-[#0041FF] tracking-custom mt-4 max-w-3xl mx-auto">
                 {displayText}
               </p>
             </div>

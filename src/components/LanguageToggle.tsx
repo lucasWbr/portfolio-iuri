@@ -4,7 +4,11 @@ import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 
-export default function LanguageToggle() {
+export default function LanguageToggle({
+  className = "",
+}: {
+  className?: string;
+}) {
   const { language, isLoading, toggleLanguage } = useLanguage();
 
   if (isLoading) {
@@ -26,13 +30,11 @@ export default function LanguageToggle() {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="flex items-center gap-2 border-blue-300 text-black hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] transition-all duration-200"
+      className={`flex items-center gap-2 transition-all duration-200 ${className}`}
       title={tooltipText}
     >
-      <Globe className="h-4 w-4 text-black" />
-      <span className="text-sm font-medium text-black">
-        {currentLanguageCode}
-      </span>
+      <Globe className="h-4 w-4" />
+      <span className="text-sm font-medium">{currentLanguageCode}</span>
     </Button>
   );
 }

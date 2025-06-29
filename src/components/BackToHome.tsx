@@ -1,23 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useLanguage } from "@/hooks/use-language";
 
 export default function BackToHome() {
   const { language } = useLanguage();
 
   return (
-    <div className="bg-blue-50 border-b border-blue-100 px-6 py-3">
-      <div className="max-w-7xl mx-auto">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 text-sm font-medium group"
-        >
-          <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1" />
-          {language === "en" ? "Back" : "Voltar"}
-        </Link>
-      </div>
+    <div className="flex items-center w-full max-w-7xl mx-auto px-6 pt-8 pb-2">
+      <Link href="/" className="flex items-center group">
+        <ArrowLeftIcon className="h-7 w-7 text-[#0041ff] group-hover:-translate-x-1 transition-transform duration-200" />
+        <span className="sr-only">Voltar</span>
+      </Link>
     </div>
   );
 }
