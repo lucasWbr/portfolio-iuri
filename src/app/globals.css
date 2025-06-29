@@ -138,6 +138,10 @@
   font-family: var(--font-oswald);
 }
 
+.font-archivo-narrow {
+  font-family: "Archivo Narrow", Arial, sans-serif;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -145,4 +149,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.tracking-custom {
+  letter-spacing: 0.05em;
 }

@@ -6,6 +6,8 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/use-language";
+import "@fontsource/archivo-narrow/400.css";
+import "@fontsource/archivo-narrow/700.css";
 
 interface HeaderProps {
   showTags?: boolean;
@@ -22,7 +24,7 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
-  const { language, translateTag, isLoading: languageLoading } = useLanguage();
+  const { language, translateTag } = useLanguage();
 
   // Buscar tags se não foram fornecidas
   useEffect(() => {
@@ -33,7 +35,8 @@ export default function Header({
           const data = await response.json();
           if (data.success) {
             // Extrair apenas os nomes das tags ativas
-            const tagNames = data.data?.map((tag: any) => tag.name) || [];
+            const tagNames =
+              data.data?.map((tag: { name: string }) => tag.name) || [];
             setAllTags(tagNames);
           }
         } catch (error) {
@@ -43,8 +46,9 @@ export default function Header({
             const trabalhoData = await response.json();
             if (trabalhoData.success) {
               const extractedTags =
-                trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
-                [];
+                trabalhoData.data?.flatMap(
+                  (trabalho: { tags: string[] }) => trabalho.tags
+                ) || [];
               const uniqueTags = [...new Set(extractedTags)] as string[];
               setAllTags(uniqueTags);
             }
@@ -62,26 +66,25 @@ export default function Header({
   const displayTags = showTags ? allTags : [];
 
   return (
-    <header className="w-full header-custom border-b border-blue-600 px-6 py-4">
+    <header className="w-full bg-index-custom px-6 py-4">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout */}
-        <div className="hidden md:flex justify-between items-center">
+        <div className="hidden sm:flex justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)]"
           >
             <Image
-              src="/icone-site.png"
+              src="/icone-sitevazado.gif"
               alt="Logo"
-              width={50}
-              height={50}
-              className="filter brightness-0 invert"
+              width={100}
+              height={100}
             />
           </Link>
 
           {/* Centro - Tags e Bio */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-8 font-archivo-narrow text-[#0041FF] uppercase tracking-custom">
             {/* Tags */}
             {showTags && (
               <nav className="flex items-center gap-6">
@@ -89,10 +92,10 @@ export default function Header({
                   <Link
                     key={tag}
                     href={`/tag/${encodeURIComponent(tag)}`}
-                    className={`whitespace-nowrap font-bold capitalize transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
+                    className={`whitespace-nowrap font-archivo-narrow capitalize transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
                       tag === currentTag
-                        ? "text-white"
-                        : "text-blue-200 hover:text-white"
+                        ? "font-bold font-archivo-narrow"
+                        : "font-normal"
                     }`}
                   >
                     {translateTag(tag)}
@@ -104,10 +107,10 @@ export default function Header({
             {/* Bio */}
             <Link
               href="/bio"
-              className={`transition-all duration-200 font-bold hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
+              className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
                 currentPage === "bio"
-                  ? "text-white"
-                  : "text-blue-200 hover:text-white"
+                  ? "font-bold font-archivo-narrow"
+                  : "font-normal"
               }`}
             >
               Bio
@@ -115,29 +118,28 @@ export default function Header({
           </div>
 
           {/* LanguageToggle */}
-          <LanguageToggle />
+          <LanguageToggle className="text-[#0041FF] bg-transparent border-none shadow-none" />
         </div>
 
         {/* Mobile Layout */}
-        <div className="md:hidden flex justify-between items-center">
+        <div className="flex sm:hidden justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)]"
           >
             <Image
-              src="/icone-site.png"
+              src="/icone-sitevazado.gif"
               alt="Logo"
-              width={40}
-              height={40}
-              className="filter brightness-0 invert"
+              width={56}
+              height={56}
             />
           </Link>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-white hover:text-blue-200 transition-colors duration-200"
+            className="text-[#0041ff] hover:text-blue-900 transition-colors duration-200"
           >
             {isMobileMenuOpen ? (
               <X className="h-6 w-6" />
@@ -149,49 +151,40 @@ export default function Header({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-blue-600">
+          <div className="mt-4 pb-4 border-t border-blue-600 sm:hidden">
             <div className="flex flex-col space-y-4 pt-4">
               {/* Bio */}
               <Link
                 href="/bio"
-                className={`transition-all duration-200 font-bold hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
+                className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
                   currentPage === "bio"
-                    ? "text-white"
-                    : "text-blue-200 hover:text-white"
+                    ? "font-bold font-archivo-narrow"
+                    : "font-normal"
                 }`}
-                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Bio
               </Link>
-
               {/* Tags */}
-              {showTags && (
-                <>
-                  <div className="text-blue-300 text-sm font-medium">
-                    {language === "en" ? "Categories:" : "Categorias:"}
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {displayTags.map((tag) => (
-                      <Link
-                        key={tag}
-                        href={`/tag/${encodeURIComponent(tag)}`}
-                        className={`text-sm font-bold capitalize transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] ${
-                          tag === currentTag
-                            ? "text-white"
-                            : "text-blue-200 hover:text-white"
-                        }`}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        {translateTag(tag)}
-                      </Link>
-                    ))}
-                  </div>
-                </>
+              {showTags && displayTags.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {displayTags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/tag/${encodeURIComponent(tag)}`}
+                      className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
+                        tag === currentTag
+                          ? "font-bold font-archivo-narrow"
+                          : "font-normal"
+                      }`}
+                    >
+                      {translateTag(tag)}
+                    </Link>
+                  ))}
+                </div>
               )}
-
               {/* Language Toggle */}
               <div className="pt-2">
-                <LanguageToggle />
+                <LanguageToggle className="text-[#0041FF] bg-transparent border-none shadow-none" />
               </div>
             </div>
           </div>

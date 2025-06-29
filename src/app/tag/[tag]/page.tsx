@@ -22,7 +22,7 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export default function TagPage() {
-  const { language, isLoading: languageLoading, translateTag } = useLanguage();
+  const { isLoading: languageLoading, translateTag } = useLanguage();
   const params = useParams();
   const [trabalhos, setTrabalhos] = useState<Trabalho[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -62,7 +62,7 @@ export default function TagPage() {
         } else {
           setTagExists(false);
         }
-      } catch (error) {
+      } catch {
         setTagExists(false);
       } finally {
         setIsLoading(false);
@@ -78,19 +78,13 @@ export default function TagPage() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <BackToHome />
-        <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white shadow-sm overflow-hidden animate-pulse"
-              >
-                <div className="w-full aspect-square bg-gray-200"></div>
-                <div className="p-4">
-                  <div className="h-6 bg-gray-200 rounded"></div>
-                </div>
-              </div>
+                className="relative aspect-square w-full min-h-[260px] md:min-h-[340px] lg:min-h-[420px] bg-gray-200 animate-pulse"
+              />
             ))}
           </div>
         </main>
@@ -103,7 +97,6 @@ export default function TagPage() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <BackToHome />
         <main className="flex-1 max-w-7xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
             <p className="text-gray-500 text-lg">Tag não encontrada.</p>
@@ -127,18 +120,19 @@ export default function TagPage() {
         tags={allTags.map((tag) => tag.name)}
         currentTag={decodedTag}
       />
-      <BackToHome />
-
-      {/* Título da página e descrição */}
-      <div className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black capitalize">
-            {displayTagName}
-          </h1>
-
+      <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+        <div className="flex flex-col items-center mb-12">
+          <div className="relative flex items-center w-full max-w-7xl mx-auto px-6 pt-8 pb-2 mb-4">
+            <div className="absolute left-0">
+              <BackToHome />
+            </div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-archivo-narrow text-[#0041FF] capitalize mx-auto text-center">
+              {displayTagName}
+            </h1>
+          </div>
           {/* Descrição da tag */}
           {tagInfo?.description && (
-            <p className="text-lg text-gray-600 mt-4 max-w-3xl mx-auto font-oswald">
+            <p className="text-lg font-archivo-narrow text-[#0041FF] tracking-custom mt-4 max-w-3xl mx-auto">
               {tagInfo.description}
             </p>
           )}
@@ -158,66 +152,32 @@ export default function TagPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trabalhos.map((trabalho) => (
               <Link
                 key={trabalho.id}
                 href={`/trabalho/${trabalho.id}`}
-                className="group block"
+                className="group block focus:outline-none"
+                tabIndex={0}
               >
-                <div className="bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
-                  {/* Imagem do trabalho */}
-                  <div className="aspect-square bg-gray-100 relative">
-                    {trabalho.image.length > 0 ? (
-                      <Image
-                        src={trabalho.image[0]}
-                        alt={trabalho.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <span>Sem imagem</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Título centralizado e tags */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-200 text-center uppercase mb-2">
+                <div className="relative aspect-square w-full min-h-[260px] md:min-h-[340px] lg:min-h-[420px]">
+                  <Image
+                    src={trabalho.image[0]}
+                    alt={trabalho.name}
+                    fill
+                    className="object-cover transition-transform duration-200"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 bg-black/70">
+                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none">
                       {trabalho.name}
-                    </h3>
-
-                    {/* Tags em linha abaixo do título */}
-                    {trabalho.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 justify-end">
-                        {trabalho.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className={`text-xs px-1.5 py-0.5 rounded capitalize ${
-                              tag === decodedTag
-                                ? "bg-blue-100 text-blue-600"
-                                : "bg-gray-100 text-gray-600"
-                            }`}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {trabalho.tags.length > 2 && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                            +{trabalho.tags.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    </span>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
-
+      </main>
       <Footer />
       <ContactButton />
     </div>

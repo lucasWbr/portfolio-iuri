@@ -45,18 +45,13 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="bg-white shadow-sm overflow-hidden animate-pulse"
-              >
-                <div className="w-full aspect-square bg-gray-200"></div>
-                <div className="p-4">
-                  <div className="h-6 bg-gray-200 rounded"></div>
-                </div>
-              </div>
+                className="relative aspect-square w-full min-h-[260px] md:min-h-[340px] lg:min-h-[420px] bg-gray-200 animate-pulse"
+              />
             ))}
           </div>
         </main>
@@ -70,7 +65,7 @@ export default function Home() {
       <Header showTags={true} tags={tags} />
 
       {/* Grid de trabalhos */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
+      <main className="flex-1 w-[92%] mx-auto px-6 py-8">
         {trabalhos.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">Nenhum trabalho encontrado.</p>
@@ -79,54 +74,25 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trabalhos.map((trabalho) => (
               <Link
                 key={trabalho.id}
                 href={`/trabalho/${trabalho.id}`}
-                className="group block"
+                className="group block focus:outline-none"
+                tabIndex={0}
               >
-                <div className="bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
-                  {/* Imagem do trabalho */}
-                  <div className="aspect-square bg-gray-100 relative">
-                    {trabalho.image.length > 0 ? (
-                      <Image
-                        src={trabalho.image[0]}
-                        alt={trabalho.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <span>Sem imagem</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Título centralizado e tags */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 group-hover:text-gray-700 transition-colors duration-200 text-center uppercase mb-2">
+                <div className="relative aspect-square w-full min-h-[260px] md:min-h-[340px] lg:min-h-[420px]">
+                  <Image
+                    src={trabalho.image[0]}
+                    alt={trabalho.name}
+                    fill
+                    className="object-cover transition-transform duration-200"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 bg-black/70">
+                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none">
                       {trabalho.name}
-                    </h3>
-
-                    {/* Tags em linha abaixo do título */}
-                    {trabalho.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 justify-end">
-                        {trabalho.tags.slice(0, 2).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded capitalize"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {trabalho.tags.length > 2 && (
-                          <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
-                            +{trabalho.tags.length - 2}
-                          </span>
-                        )}
-                      </div>
-                    )}
+                    </span>
                   </div>
                 </div>
               </Link>

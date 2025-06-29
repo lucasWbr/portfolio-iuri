@@ -5,6 +5,7 @@ import { useLanguage } from "@/hooks/use-language";
 import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin, Facebook } from "lucide-react";
+import "@fontsource/archivo-narrow/400.css";
 
 // Componente customizado do ícone Behance
 const BehanceIcon = ({ className }: { className?: string }) => (
@@ -32,22 +33,24 @@ export default function Footer() {
         const data = await response.json();
         if (data.success) {
           // Extrair apenas os nomes das tags ativas
-          const tagNames = data.data?.map((tag: any) => tag.name) || [];
+          const tagNames =
+            data.data?.map((tag: { name: string }) => tag.name) || [];
           setTags(tagNames);
         }
-      } catch (error) {
+      } catch {
         // Fallback para buscar das trabalhos se API de tags falhar
         try {
           const response = await fetch("/api/trabalhos");
           const trabalhoData = await response.json();
           if (trabalhoData.success) {
             const extractedTags =
-              trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
-              [];
+              trabalhoData.data?.flatMap(
+                (trabalho: { tags: string[] }) => trabalho.tags
+              ) || [];
             const uniqueTags = [...new Set(extractedTags)] as string[];
             setTags(uniqueTags);
           }
-        } catch (fallbackError) {
+        } catch {
           // Silenciar erros em produção
         }
       }
@@ -57,11 +60,6 @@ export default function Footer() {
 
   if (!config) return null;
 
-  // Função para capitalizar o nome do artista
-  const capitalizeWords = (str: string) => {
-    return str.replace(/\b\w/g, (l) => l.toUpperCase());
-  };
-
   const copyrightText =
     language === "en"
       ? "Unauthorized replication of the contents of this site, text and images are strictly prohibited"
@@ -69,7 +67,7 @@ export default function Footer() {
 
   return (
     <footer
-      className="bg-blue-600 text-white mt-16"
+      className="bg-blue-600 text-white mt-16 font-archivo-narrow"
       style={{ backgroundColor: "#0041ff" }}
     >
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -93,7 +91,7 @@ export default function Footer() {
                 href={config.behance}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <BehanceIcon className="h-5 w-5" />
               </a>
@@ -104,7 +102,7 @@ export default function Footer() {
                 href={config.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
@@ -115,7 +113,7 @@ export default function Footer() {
                 href={config.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Instagram className="h-5 w-5" />
               </a>
@@ -126,7 +124,7 @@ export default function Footer() {
                 href={config.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)]"
+                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Facebook className="h-5 w-5" />
               </a>
@@ -142,7 +140,7 @@ export default function Footer() {
               <Link
                 key={tag}
                 href={`/tag/${encodeURIComponent(tag)}`}
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold"
+                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 {translateTag(tag)}
               </Link>
@@ -151,7 +149,7 @@ export default function Footer() {
             {/* Bio */}
             <Link
               href="/bio"
-              className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm font-bold"
+              className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm font-bold font-archivo-narrow uppercase"
             >
               Bio
             </Link>
@@ -163,7 +161,7 @@ export default function Footer() {
 
         {/* Copyright centralizado */}
         <div className="text-center">
-          <p className="text-blue-200 text-xs">
+          <p className="text-blue-200 text-xs font-archivo-narrow">
             © {new Date().getFullYear()} Iuri Lang Meira • {copyrightText}
           </p>
         </div>
