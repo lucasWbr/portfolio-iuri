@@ -32,7 +32,6 @@ export function extractFilePathFromUrl(url: string): string | null {
     const filePath = pathParts.slice(bucketIndex + 1).join("/");
     return filePath || null;
   } catch (error) {
-    console.error("Erro ao extrair caminho do arquivo:", error);
     return null;
   }
 }
@@ -54,13 +53,11 @@ export async function deleteFileFromStorage(
       .remove([filePath]);
 
     if (error) {
-      console.error("Erro ao deletar arquivo:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error) {
-    console.error("Erro inesperado ao deletar arquivo:", error);
     return { success: false, error: "Erro inesperado" };
   }
 }
@@ -98,14 +95,12 @@ export async function deleteMultipleFilesFromStorage(
       .remove(filePaths);
 
     if (error) {
-      console.error("Erro ao deletar arquivos:", error);
       errors.push(error.message);
       return { success: false, deletedCount: 0, errors };
     }
 
     return { success: true, deletedCount: filePaths.length, errors };
   } catch (error) {
-    console.error("Erro inesperado ao deletar arquivos:", error);
     errors.push("Erro inesperado");
     return { success: false, deletedCount: 0, errors };
   }
@@ -181,7 +176,6 @@ export async function findOrphanedFiles(): Promise<{
 
     return { success: true, orphanedFiles };
   } catch (error) {
-    console.error("Erro ao buscar arquivos órfãos:", error);
     return { success: false, orphanedFiles: [], error: "Erro inesperado" };
   }
 }
@@ -236,7 +230,6 @@ export async function cleanupOrphanedFiles(
 
     return { success: true, deletedCount: filesToDelete.length, errors: [] };
   } catch (error) {
-    console.error("Erro na limpeza automática:", error);
     return { success: false, deletedCount: 0, errors: ["Erro inesperado"] };
   }
 }
@@ -268,7 +261,6 @@ export async function isFileStillReferenced(url: string): Promise<boolean> {
 
     return usuarioCount > 0;
   } catch (error) {
-    console.error("Erro ao verificar referência do arquivo:", error);
     return true; // Em caso de erro, assume que ainda está referenciado para segurança
   }
 }
@@ -299,7 +291,6 @@ export async function safeDeleteFile(url: string): Promise<{
       error: result.error,
     };
   } catch (error) {
-    console.error("Erro na deleção segura:", error);
     return { success: false, deleted: false, error: "Erro inesperado" };
   }
 }

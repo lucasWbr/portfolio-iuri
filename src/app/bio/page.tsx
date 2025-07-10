@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Linkedin, Facebook, Instagram } from "lucide-react";
 import Image from "next/image";
+import { fetchTagsWithCache } from "@/lib/utils/tagCache";
+import { useTags } from "@/hooks/useTags";
 
 // Componente customizado do ícone Behance (já que não existe no Lucide)
 const BehanceIcon = ({ className }: { className?: string }) => (
@@ -26,45 +28,14 @@ const BehanceIcon = ({ className }: { className?: string }) => (
 export default function Bio() {
   const { language, isLoading: languageLoading } = useLanguage();
   const { config, isLoading: configLoading } = useConfig();
-  const [tags, setTags] = useState<string[]>([]);
+  const { data: tags, isLoading: tagsLoading, error: tagsError } = useTags();
 
-  const isLoading = languageLoading || configLoading;
-
-  // Buscar apenas tags ativas para mostrar no header
-  useEffect(() => {
-    async function fetchActiveTags() {
-      try {
-        const response = await fetch("/api/tags");
-        const data = await response.json();
-        if (data.success) {
-          // Extrair apenas os nomes das tags ativas
-          const activeTagNames = data.data?.map((tag: any) => tag.name) || [];
-          setTags(activeTagNames);
-        }
-      } catch (error) {
-        // Fallback para buscar das trabalhos se API de tags falhar
-        try {
-          const response = await fetch("/api/trabalhos");
-          const trabalhoData = await response.json();
-          if (trabalhoData.success) {
-            const allTags =
-              trabalhoData.data?.flatMap((trabalho: any) => trabalho.tags) ||
-              [];
-            const uniqueTags = [...new Set(allTags)] as string[];
-            setTags(uniqueTags);
-          }
-        } catch (fallbackError) {
-          // Erro ao buscar tags
-        }
-      }
-    }
-    fetchActiveTags();
-  }, []);
+  const isLoading = languageLoading || configLoading || tagsLoading;
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
-        <Header showTags={true} tags={tags} />
+        <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
         <BackToHome />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
@@ -86,10 +57,10 @@ export default function Bio() {
     );
   }
 
-  if (!config) {
+  if (!config || tagsError) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
-        <Header showTags={true} tags={tags} />
+        <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
         <BackToHome />
         <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
@@ -112,9 +83,8 @@ export default function Bio() {
 
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
-      <Header showTags={true} tags={tags} />
+      <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
       <BackToHome />
-
       <main className="flex-1 max-w-4xl mx-auto px-6 py-16 w-full">
         <div className="bg-white rounded-lg shadow-sm p-8 md:p-12">
           <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -136,19 +106,16 @@ export default function Bio() {
                 )}
               </div>
             </div>
-
             {/* Informações do artista */}
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-6">
                 {config.name}
               </h1>
-
               <div className="prose prose-gray max-w-none">
                 <p className="text-gray-600 leading-relaxed whitespace-pre-wrap font-oswald">
                   {displayText}
                 </p>
               </div>
-
               {/* Redes sociais */}
               <div className="flex gap-4 mt-8">
                 {config.behance && (
@@ -161,7 +128,6 @@ export default function Bio() {
                     <BehanceIcon className="w-6 h-6 text-gray-600" />
                   </Link>
                 )}
-
                 {config.linkedin && (
                   <Link
                     href={config.linkedin}
@@ -172,7 +138,6 @@ export default function Bio() {
                     <Linkedin className="w-6 h-6 text-gray-600" />
                   </Link>
                 )}
-
                 {config.facebook && (
                   <Link
                     href={config.facebook}
@@ -183,7 +148,6 @@ export default function Bio() {
                     <Facebook className="w-6 h-6 text-gray-600" />
                   </Link>
                 )}
-
                 {config.instagram && (
                   <Link
                     href={config.instagram}
@@ -199,7 +163,6 @@ export default function Bio() {
           </div>
         </div>
       </main>
-
       <Footer />
       <ContactButton />
     </div>

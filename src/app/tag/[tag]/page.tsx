@@ -10,6 +10,9 @@ import { Trabalho, Tag } from "@/types";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams } from "next/navigation";
+import { fetchTagsWithCache } from "@/lib/utils/tagCache";
+import { useTags } from "@/hooks/useTags";
+import { useTrabalhos } from "@/hooks/useTrabalhos";
 
 // Função para embaralhar array (Fisher-Yates shuffle)
 function shuffleArray<T>(array: T[]): T[] {
@@ -24,57 +27,27 @@ function shuffleArray<T>(array: T[]): T[] {
 export default function TagPage() {
   const { isLoading: languageLoading, translateTag } = useLanguage();
   const params = useParams();
-  const [trabalhos, setTrabalhos] = useState<Trabalho[]>([]);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
-  const [tagInfo, setTagInfo] = useState<Tag | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [tagExists, setTagExists] = useState(true);
+  const {
+    data: trabalhos,
+    isLoading: trabalhosLoading,
+    error: trabalhosError,
+  } = useTrabalhos({ all: true });
+  const { data: tags, isLoading: tagsLoading, error: tagsError } = useTags();
 
   const decodedTag =
     typeof params.tag === "string" ? decodeURIComponent(params.tag) : "";
-
-  // Traduzir o nome da tag para exibição
   const displayTagName = translateTag(decodedTag);
 
-  useEffect(() => {
-    async function fetchTrabalhosByTag() {
-      try {
-        const response = await fetch(
-          `/api/tag/${encodeURIComponent(decodedTag)}`
-        );
-        const data = await response.json();
+  const isLoading = trabalhosLoading || tagsLoading || languageLoading;
 
-        if (data.success) {
-          // Aplicar randomização aos trabalhos
-          const trabalhosList = (data.trabalhos || []) as Trabalho[];
-          const randomizedTrabalhos = shuffleArray(trabalhosList);
-          setTrabalhos(randomizedTrabalhos);
-          setAllTags(data.allTags || []);
-          setTagInfo(data.tagInfo || null);
+  // Filtrar trabalhos por tag
+  const trabalhosFiltrados =
+    trabalhos?.filter((trabalho) => trabalho.tags.includes(decodedTag)) || [];
 
-          // Verificar se a tag existe (se há tagInfo ou trabalhos)
-          if (
-            !data.tagInfo &&
-            (!data.trabalhos || data.trabalhos.length === 0)
-          ) {
-            setTagExists(false);
-          }
-        } else {
-          setTagExists(false);
-        }
-      } catch {
-        setTagExists(false);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  // Encontrar info da tag
+  const tagInfo = tags?.find((tag) => tag.name === decodedTag) || null;
 
-    if (decodedTag) {
-      fetchTrabalhosByTag();
-    }
-  }, [decodedTag]);
-
-  if (isLoading || languageLoading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
@@ -93,10 +66,24 @@ export default function TagPage() {
     );
   }
 
-  if (!tagExists) {
+  if (trabalhosError || tagsError) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
+        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+          <div className="text-center py-16">
+            <p className="text-gray-500 text-lg">Erro ao carregar dados.</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!tagInfo && trabalhosFiltrados.length === 0) {
+    return (
+      <div className="min-h-screen bg-index-custom flex flex-col">
+        <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
         <main className="flex-1 max-w-7xl mx-auto px-6 py-16 w-full">
           <div className="text-center">
             <p className="text-gray-500 text-lg">Tag não encontrada.</p>
@@ -117,7 +104,7 @@ export default function TagPage() {
     <div className="min-h-screen bg-index-custom flex flex-col">
       <Header
         showTags={true}
-        tags={allTags.map((tag) => tag.name)}
+        tags={tags?.map((tag) => tag.name) || []}
         currentTag={decodedTag}
       />
       <main className="flex-1 w-[92%] mx-auto px-6 py-8">
@@ -139,7 +126,7 @@ export default function TagPage() {
         </div>
 
         {/* Grid de trabalhos */}
-        {trabalhos.length === 0 ? (
+        {trabalhosFiltrados.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">
               Nenhum trabalho encontrado para esta tag.
@@ -153,7 +140,7 @@ export default function TagPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {trabalhos.map((trabalho) => (
+            {trabalhosFiltrados.map((trabalho) => (
               <Link
                 key={trabalho.id}
                 href={`/trabalho/${trabalho.id}`}

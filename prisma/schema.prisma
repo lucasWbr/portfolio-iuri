@@ -25,6 +25,8 @@ model Trabalhos {
   youtubeUrl String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  favorite      Boolean? @default(false)
+  frontPageHide Boolean? @default(false)
 
   @@map("trabalhos")
 }

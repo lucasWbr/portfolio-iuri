@@ -197,6 +197,8 @@ export default function FileUpload({
                   width={200}
                   height={200}
                   className="w-full h-full object-cover"
+                  placeholder="empty"
+                  unoptimized={url.endsWith(".gif")}
                 />
               </div>
 
@@ -206,9 +208,15 @@ export default function FileUpload({
                 size="icon"
                 className="absolute -top-2 -right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={() => removeFile(index)}
+                disabled={isUploading}
               >
                 <X className="h-3 w-3" />
               </Button>
+              {isUploading && (
+                <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                </div>
+              )}
             </div>
           ))}
         </div>

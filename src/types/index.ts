@@ -9,6 +9,8 @@ export interface Trabalho {
   youtubeUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  favorite?: boolean;
+  frontPageHide?: boolean;
 }
 
 export interface Usuario {

@@ -31,7 +31,7 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
               alt="Logo Admin"
               width={32}
               height={32}
-              className="w-8 h-8"
+              placeholder="empty"
             />
             <span className="ml-2 text-lg font-semibold text-gray-900 hidden sm:block">
               Admin

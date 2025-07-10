@@ -46,6 +46,7 @@ import FileUploadStaging, {
 } from "./FileUploadStaging";
 import type { Trabalho } from "@/types";
 import { fetchYouTubeThumbnail, isValidYouTubeUrl } from "@/lib/youtube-utils";
+import { Switch } from "@/components/ui/switch";
 
 interface TrabalhoFormProps {
   trabalho?: Trabalho;
@@ -85,6 +86,8 @@ export default function TrabalhoForm({
     tags: trabalho?.tags || [],
     image: trabalho?.image || [],
     youtubeUrl: trabalho?.youtubeUrl || "",
+    favorite: trabalho?.favorite || false,
+    frontPageHide: trabalho?.frontPageHide || false,
   };
 
   // Usar schema base sem validação de imagens para permitir arquivos pendentes
@@ -96,6 +99,8 @@ export default function TrabalhoForm({
     tags: z.array(z.string()).min(1, "Pelo menos uma tag é obrigatória"),
     image: z.array(z.string()).optional(),
     youtubeUrl: z.string().optional(),
+    favorite: z.boolean().optional(),
+    frontPageHide: z.boolean().optional(),
   });
 
   const form = useForm<TrabalhoFormData>({
@@ -522,6 +527,42 @@ export default function TrabalhoForm({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Switches de Favorito e Ocultar da Home */}
+            <div className="flex flex-col md:flex-row gap-4 mt-4">
+              <FormField
+                control={form.control}
+                name="favorite"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-2">
+                    <FormLabel>Favorito</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={!!field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="frontPageHide"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-2">
+                    <FormLabel>Ocultar da página inicial</FormLabel>
+                    <FormControl>
+                      <Switch
+                        checked={!!field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Conteúdo baseado no tipo */}

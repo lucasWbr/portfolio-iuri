@@ -16,12 +16,26 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const randomize = searchParams.get("randomize") === "true";
 
+    const all = searchParams.get("all") === "true";
     const trabalhos = await prisma.trabalhos.findMany({
       orderBy: { createdAt: "desc" },
     });
 
-    // Aplicar randomização se solicitado
-    const finalTrabalhos = randomize ? shuffleArray(trabalhos) : trabalhos;
+    let finalTrabalhos;
+    if (all) {
+      finalTrabalhos = trabalhos;
+    } else {
+      // Filtrar trabalhos que não devem aparecer na home
+      const filtered = trabalhos.filter((t: any) => t.frontPageHide !== true);
+      // Separar favoritos e não favoritos
+      const favoritos = filtered.filter((t: any) => t.favorite === true);
+      const outros = filtered.filter((t: any) => t.favorite !== true);
+      // Embaralhar ambos
+      const favoritosShuffled = shuffleArray(favoritos);
+      const outrosShuffled = shuffleArray(outros);
+      // Concatenar favoritos no topo
+      finalTrabalhos = [...favoritosShuffled, ...outrosShuffled];
+    }
 
     return NextResponse.json({
       success: true,

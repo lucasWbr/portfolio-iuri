@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin, Facebook } from "lucide-react";
 import "@fontsource/archivo-narrow/400.css";
+import { useTags } from "@/hooks/useTags";
+import { useState, useEffect } from "react";
 
 // Componente customizado do ícone Behance
 const BehanceIcon = ({ className }: { className?: string }) => (
@@ -18,47 +20,13 @@ const BehanceIcon = ({ className }: { className?: string }) => (
     <path d="M6.938 4.503c.702 0 1.34.06 1.92.188.577.13 1.07.33 1.485.61.41.28.733.65.96 1.12.225.47.34 1.05.34 1.73 0 .74-.17 1.36-.507 1.86-.338.5-.837.9-1.502 1.22.906.26 1.576.72 2.022 1.37.448.66.673 1.42.673 2.28 0 .76-.13 1.41-.41 1.96-.28.55-.67 1-.17 1.39-.5.39-1.1.67-1.78.84-.68.17-1.42.25-2.23.25H0V4.51h6.938v-.007zM3.495 8.887h2.262c.31 0 .618-.03.926-.09.31-.06.58-.17.83-.35.25-.18.44-.42.58-.72.14-.3.21-.68.21-1.14 0-.56-.17-1.02-.5-1.37-.33-.35-.87-.53-1.61-.53H3.495v4.2zm0 7.725h2.851c.48 0 .91-.05 1.29-.16.38-.1.7-.28.96-.52.26-.24.45-.55.58-.93.13-.38.19-.84.19-1.38 0-.58-.14-1.05-.42-1.42-.28-.37-.68-.65-1.18-.84-.5-.19-1.04-.29-1.61-.29H3.495v5.54zM15.668 7.156h7.706v2.017h-7.706V7.156zm.372 8.818c.3.33.735.49 1.304.49.42 0 .78-.1 1.08-.3.3-.2.5-.44.61-.73h2.24c-.42 1.19-1.01 2.02-1.78 2.48-.77.46-1.68.69-2.73.69-.69 0-1.31-.1-1.86-.31-.55-.21-1.03-.51-1.42-.9-.4-.39-.71-.85-.92-1.4-.21-.55-.32-1.15-.32-1.8 0-.66.11-1.26.34-1.81.23-.55.55-1.01.96-1.4.41-.39.88-.69 1.42-.89.54-.2 1.11-.31 1.72-.31.65 0 1.22.13 1.72.38.5.25.92.58 1.26 1.01.34.43.58.93.74 1.51.16.58.23 1.18.21 1.82h-6.39c0 .67.18 1.27.48 1.6zm.36-4.23c-.25.24-.41.59-.49.99h4.09c-.06-.4-.2-.75-.42-.99-.22-.24-.54-.36-.95-.36-.41 0-.73.12-.98.36-.25.24-.41.59-.49.99z" />
   </svg>
 );
-import { useState, useEffect } from "react";
 
 export default function Footer() {
   const { config } = useConfig();
   const { language, translateTag } = useLanguage();
-  const [tags, setTags] = useState<string[]>([]);
+  const { data: tags, isLoading: tagsLoading, error: tagsError } = useTags();
 
-  // Buscar tags para o footer (mesma lógica do Header)
-  useEffect(() => {
-    async function fetchTags() {
-      try {
-        const response = await fetch("/api/tags");
-        const data = await response.json();
-        if (data.success) {
-          // Extrair apenas os nomes das tags ativas
-          const tagNames =
-            data.data?.map((tag: { name: string }) => tag.name) || [];
-          setTags(tagNames);
-        }
-      } catch {
-        // Fallback para buscar das trabalhos se API de tags falhar
-        try {
-          const response = await fetch("/api/trabalhos");
-          const trabalhoData = await response.json();
-          if (trabalhoData.success) {
-            const extractedTags =
-              trabalhoData.data?.flatMap(
-                (trabalho: { tags: string[] }) => trabalho.tags
-              ) || [];
-            const uniqueTags = [...new Set(extractedTags)] as string[];
-            setTags(uniqueTags);
-          }
-        } catch {
-          // Silenciar erros em produção
-        }
-      }
-    }
-    fetchTags();
-  }, []);
-
-  if (!config) return null;
+  if (!config || tagsLoading || tagsError) return null;
 
   const copyrightText =
     language === "en"
@@ -78,8 +46,8 @@ export default function Footer() {
             <Image
               src="/icone-site.png"
               alt="Logo"
-              width={50}
-              height={50}
+              width={72}
+              height={72}
               className="filter brightness-0 invert"
             />
           </Link>
@@ -91,7 +59,7 @@ export default function Footer() {
                 href={config.behance}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
+                className="text-blue-200 hover:text-white transition-all duration-200 text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <BehanceIcon className="h-5 w-5" />
               </a>
@@ -102,7 +70,7 @@ export default function Footer() {
                 href={config.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
+                className="text-blue-200 hover:text-white transition-all duration-200 text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
@@ -113,7 +81,7 @@ export default function Footer() {
                 href={config.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
+                className="text-blue-200 hover:text-white transition-all duration-200 text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Instagram className="h-5 w-5" />
               </a>
@@ -124,7 +92,7 @@ export default function Footer() {
                 href={config.facebook}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
+                className="text-blue-200 hover:text-white transition-all duration-200 text-sm capitalize font-bold font-archivo-narrow uppercase"
               >
                 <Facebook className="h-5 w-5" />
               </a>
@@ -136,20 +104,19 @@ export default function Footer() {
         <div className="mb-6">
           <div className="flex flex-wrap items-center gap-4">
             {/* Tags */}
-            {tags.slice(0, 6).map((tag) => (
+            {tags?.slice(0, 6).map((tag) => (
               <Link
-                key={tag}
-                href={`/tag/${encodeURIComponent(tag)}`}
-                className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm capitalize font-bold font-archivo-narrow uppercase"
+                key={tag.name}
+                href={`/tag/${encodeURIComponent(tag.name)}`}
+                className="text-blue-200 hover:text-white transition-all duration-200 text-sm capitalize font-bold font-archivo-narrow uppercase hover:font-bold hover:font-archivo-narrow"
               >
-                {translateTag(tag)}
+                {translateTag(tag.name)}
               </Link>
             ))}
-
             {/* Bio */}
             <Link
               href="/bio"
-              className="text-blue-200 hover:text-white transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(255,255,255,0.8)] text-sm font-bold font-archivo-narrow uppercase"
+              className="text-blue-200 hover:text-white transition-all duration-200 text-sm font-bold font-archivo-narrow uppercase hover:font-bold hover:font-archivo-narrow"
             >
               Bio
             </Link>

@@ -44,7 +44,6 @@ export async function fetchYouTubeThumbnail(
 
     return null;
   } catch (error) {
-    console.error("Erro ao buscar thumbnail do YouTube:", error);
     return null;
   }
 }

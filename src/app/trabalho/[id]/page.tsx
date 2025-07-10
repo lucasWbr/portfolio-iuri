@@ -7,15 +7,18 @@ import ContactButton from "@/components/ContactButton";
 import { useLanguage } from "@/hooks/use-language";
 import { useState, useEffect } from "react";
 import { Trabalho } from "@/types";
+import Image from "next/image";
 // import Image from "next/image"; // Usando img regular por enquanto
 import { notFound } from "next/navigation";
 import { useParams } from "next/navigation";
+import { useTags } from "@/hooks/useTags";
 
 export default function TrabalhoPage() {
   const params = useParams();
   const { language, isLoading: languageLoading } = useLanguage();
   const [trabalho, setTrabalho] = useState<Trabalho | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: tags, isLoading: tagsLoading, error: tagsError } = useTags();
 
   useEffect(() => {
     async function fetchTrabalho() {
@@ -43,7 +46,7 @@ export default function TrabalhoPage() {
   if (isLoading || languageLoading) {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
-        <Header showTags={true} />
+        <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
         <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded mb-4 w-3/4 mx-auto"></div>
@@ -78,7 +81,7 @@ export default function TrabalhoPage() {
 
   return (
     <div className="min-h-screen bg-index-custom flex flex-col">
-      <Header />
+      <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
       <div className="relative flex items-center w-full max-w-6xl mx-auto px-6 pt-8 pb-2 mb-4">
         <div className="absolute left-0">
           <BackToHome />
@@ -128,50 +131,46 @@ export default function TrabalhoPage() {
           {isImage && trabalho.image && trabalho.image.length > 0 && (
             <div className="space-y-6">
               {trabalho.image.map((imageUrl, index) => (
-                <div
+                <Image
                   key={index}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden p-4"
-                >
-                  <img
-                    src={imageUrl}
-                    alt={`${trabalho.name} - ${index + 1}`}
-                    className="w-full h-auto object-contain max-w-full"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                </div>
+                  src={imageUrl}
+                  alt={`${trabalho.name} - ${index + 1}`}
+                  width={900}
+                  height={700}
+                  className="w-full h-auto object-contain max-w-full"
+                  placeholder="empty"
+                  unoptimized={imageUrl.endsWith(".gif")}
+                />
               ))}
 
               {/* Layout especial para Revista da Cerveja - miniaturas em linha */}
               {isRevistaDaCerveja && trabalho.image.length > 1 && (
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden p-4">
-                  <div className="flex flex-wrap gap-4 justify-center">
-                    {trabalho.image.map((imageUrl, index) => (
-                      <div key={`thumb-${index}`} className="flex-shrink-0">
-                        <img
-                          src={imageUrl}
-                          alt={`${trabalho.name} - Miniatura ${index + 1}`}
-                          className="w-32 h-40 object-cover rounded shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                          onClick={() => {
-                            // Scroll para a imagem grande correspondente
-                            const targetElement = document.querySelector(
-                              `img[src="${imageUrl}"]`
-                            );
-                            if (targetElement) {
-                              targetElement.scrollIntoView({
-                                behavior: "smooth",
-                                block: "center",
-                              });
-                            }
-                          }}
-                        />
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  {trabalho.image.map((imageUrl, index) => (
+                    <div key={`thumb-${index}`} className="flex-shrink-0">
+                      <Image
+                        src={imageUrl}
+                        alt={`${trabalho.name} - Miniatura ${index + 1}`}
+                        width={128}
+                        height={160}
+                        className="w-32 h-40 object-cover rounded shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                        placeholder="empty"
+                        unoptimized={imageUrl.endsWith(".gif")}
+                        onClick={() => {
+                          // Scroll para a imagem grande correspondente
+                          const targetElement = document.querySelector(
+                            `img[src=\"${imageUrl}\"]`
+                          );
+                          if (targetElement) {
+                            targetElement.scrollIntoView({
+                              behavior: "smooth",
+                              block: "center",
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -181,19 +180,16 @@ export default function TrabalhoPage() {
           {isVideo && trabalho.image && trabalho.image.length > 0 && (
             <div className="space-y-6">
               {trabalho.image.map((gifUrl, index) => (
-                <div
+                <Image
                   key={index}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden flex justify-center p-4"
-                >
-                  <img
-                    src={gifUrl}
-                    alt={`${trabalho.name} - GIF ${index + 1}`}
-                    className="max-w-full h-auto object-contain rounded"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
-                  />
-                </div>
+                  src={gifUrl}
+                  alt={`${trabalho.name} - GIF ${index + 1}`}
+                  width={900}
+                  height={700}
+                  className="max-w-full h-auto object-contain rounded"
+                  placeholder="empty"
+                  unoptimized={true}
+                />
               ))}
             </div>
           )}

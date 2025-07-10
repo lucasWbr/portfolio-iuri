@@ -15,6 +15,8 @@ const baseTrabalhoSchema = z.object({
   youtubeUrl: z
     .union([z.string().url("URL inválida"), z.literal("")])
     .optional(),
+  favorite: z.boolean().optional(),
+  frontPageHide: z.boolean().optional(),
 });
 
 export const trabalhoSchema = baseTrabalhoSchema.refine(

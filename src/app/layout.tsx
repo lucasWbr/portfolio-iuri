@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
+import Providers from "./Providers";
 
 export const metadata: Metadata = {
   title: "Iuri Lang Meira",
@@ -19,13 +18,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="pt-BR">
-        <body className="font-sans antialiased">
-          {children}
-          <Toaster />
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="pt-BR">
+      <body className="font-sans antialiased">
+        <Providers>{children}</Providers>
+      </body>
+    </html>
   );
 }

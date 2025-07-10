@@ -110,6 +110,8 @@ export default function TrabalhosList() {
                 alt={trabalho.name}
                 fill
                 className="object-cover"
+                placeholder="empty"
+                unoptimized={trabalho.image[0]?.endsWith(".gif")}
               />
             ) : trabalho.type === "youtube" && trabalho.youtubeUrl ? (
               <div className="w-full h-full flex items-center justify-center bg-red-100">

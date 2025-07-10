@@ -343,6 +343,8 @@ const FileUploadStaging = forwardRef<
                     width={200}
                     height={200}
                     className="w-full h-full object-cover"
+                    placeholder="empty"
+                    unoptimized={url.endsWith(".gif")}
                   />
                 </div>
                 <div className="absolute -top-1 -left-1 bg-green-500 text-white text-xs px-1 rounded">
@@ -356,10 +358,15 @@ const FileUploadStaging = forwardRef<
                   onClick={() =>
                     openRemoveModal("existing", index, `Arquivo ${index + 1}`)
                   }
-                  disabled={disabled}
+                  disabled={isUploading || disabled}
                 >
                   <X className="h-3 w-3" />
                 </Button>
+                {isUploading && (
+                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                  </div>
+                )}
               </div>
             ))}
 
@@ -373,6 +380,8 @@ const FileUploadStaging = forwardRef<
                     width={200}
                     height={200}
                     className="w-full h-full object-cover"
+                    placeholder="empty"
+                    unoptimized={pendingFile.file.name.endsWith(".gif")}
                   />
                 </div>
                 <div className="absolute -top-1 -left-1 bg-yellow-500 text-white text-xs px-1 rounded">
@@ -386,10 +395,15 @@ const FileUploadStaging = forwardRef<
                   onClick={() =>
                     openRemoveModal("pending", index, pendingFile.file.name)
                   }
-                  disabled={disabled}
+                  disabled={isUploading || disabled}
                 >
                   <X className="h-3 w-3" />
                 </Button>
+                {isUploading && (
+                  <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-20">
+                    <span className="text-blue-600 font-bold">Enviando...</span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

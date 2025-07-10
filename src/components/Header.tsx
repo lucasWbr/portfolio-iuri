@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useLanguage } from "@/hooks/use-language";
 import "@fontsource/archivo-narrow/400.css";
 import "@fontsource/archivo-narrow/700.css";
+import { fetchTagsWithCache } from "@/lib/utils/tagCache";
 
 interface HeaderProps {
   showTags?: boolean;
@@ -16,87 +17,59 @@ interface HeaderProps {
   currentPage?: string;
 }
 
-export default function Header({
-  showTags = true,
-  tags = [],
-  currentTag,
-  currentPage,
-}: HeaderProps) {
+export default function Header(props: HeaderProps) {
+  const safeTags = props.tags ?? [];
+  const [allTags, setAllTags] = useState<string[]>(safeTags);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [allTags, setAllTags] = useState<string[]>([]);
   const { language, translateTag } = useLanguage();
 
-  // Buscar tags se não foram fornecidas
   useEffect(() => {
-    if (showTags && tags.length === 0) {
-      async function fetchTags() {
-        try {
-          const response = await fetch("/api/tags");
-          const data = await response.json();
-          if (data.success) {
-            // Extrair apenas os nomes das tags ativas
-            const tagNames =
-              data.data?.map((tag: { name: string }) => tag.name) || [];
-            setAllTags(tagNames);
-          }
-        } catch (error) {
-          // Fallback para buscar das trabalhos se API de tags falhar
-          try {
-            const response = await fetch("/api/trabalhos");
-            const trabalhoData = await response.json();
-            if (trabalhoData.success) {
-              const extractedTags =
-                trabalhoData.data?.flatMap(
-                  (trabalho: { tags: string[] }) => trabalho.tags
-                ) || [];
-              const uniqueTags = [...new Set(extractedTags)] as string[];
-              setAllTags(uniqueTags);
-            }
-          } catch (fallbackError) {
-            // Silenciar erros em produção
-          }
-        }
-      }
-      fetchTags();
+    if (!props.showTags) return;
+    if (safeTags.length > 0) {
+      setAllTags(safeTags);
     } else {
-      setAllTags(tags);
+      fetchTagsWithCache().then((tagList) => {
+        setAllTags(tagList);
+      });
     }
-  }, [showTags, tags]);
+  }, [props.showTags, safeTags.join(",")]);
 
-  const displayTags = showTags ? allTags : [];
+  const displayTags = props.showTags ? allTags : [];
 
   return (
     <header className="w-full bg-index-custom px-6 py-4">
       <div className="max-w-7xl mx-auto">
         {/* Desktop Layout */}
-        <div className="hidden sm:flex justify-between items-center">
+        <div className="hidden lg:flex justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)]"
+            className="flex items-center transition-all duration-200"
           >
             <Image
               src="/icone-sitevazado.gif"
               alt="Logo"
-              width={100}
-              height={100}
+              width={128}
+              height={128}
+              placeholder="empty"
+              unoptimized={true}
             />
           </Link>
 
           {/* Centro - Tags e Bio */}
           <div className="flex items-center gap-8 font-archivo-narrow text-[#0041FF] uppercase tracking-custom">
             {/* Tags */}
-            {showTags && (
+            {props.showTags && (
               <nav className="flex items-center gap-6">
                 {displayTags.map((tag) => (
                   <Link
                     key={tag}
                     href={`/tag/${encodeURIComponent(tag)}`}
-                    className={`whitespace-nowrap font-archivo-narrow capitalize transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
-                      tag === currentTag
+                    className={`whitespace-nowrap font-archivo-narrow capitalize transition-all duration-200 text-[#0041FF] uppercase tracking-custom ${
+                      tag === props.currentTag
                         ? "font-bold font-archivo-narrow"
                         : "font-normal"
-                    }`}
+                    } hover:font-bold hover:font-archivo-narrow`}
                   >
                     {translateTag(tag)}
                   </Link>
@@ -107,11 +80,11 @@ export default function Header({
             {/* Bio */}
             <Link
               href="/bio"
-              className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
-                currentPage === "bio"
+              className={`transition-all duration-200 font-archivo-narrow text-[#0041FF] uppercase tracking-custom ${
+                props.currentPage === "bio"
                   ? "font-bold font-archivo-narrow"
                   : "font-normal"
-              }`}
+              } hover:font-bold hover:font-archivo-narrow`}
             >
               Bio
             </Link>
@@ -122,17 +95,19 @@ export default function Header({
         </div>
 
         {/* Mobile Layout */}
-        <div className="flex sm:hidden justify-between items-center">
+        <div className="flex lg:hidden justify-between items-center">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center transition-all duration-200 hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)]"
+            className="flex items-center transition-all duration-200"
           >
             <Image
               src="/icone-sitevazado.gif"
               alt="Logo"
-              width={56}
-              height={56}
+              width={96}
+              height={96}
+              placeholder="empty"
+              unoptimized={true}
             />
           </Link>
 
@@ -151,31 +126,31 @@ export default function Header({
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="mt-4 pb-4 border-t border-blue-600 sm:hidden">
+          <div className="mt-4 pb-4 border-t border-blue-600 lg:hidden">
             <div className="flex flex-col space-y-4 pt-4">
               {/* Bio */}
               <Link
                 href="/bio"
-                className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
-                  currentPage === "bio"
+                className={`transition-all duration-200 font-archivo-narrow text-[#0041FF] uppercase tracking-custom ${
+                  props.currentPage === "bio"
                     ? "font-bold font-archivo-narrow"
                     : "font-normal"
-                }`}
+                } hover:font-bold hover:font-archivo-narrow`}
               >
                 Bio
               </Link>
               {/* Tags */}
-              {showTags && displayTags.length > 0 && (
+              {props.showTags && displayTags.length > 0 && (
                 <div className="flex flex-col gap-2">
                   {displayTags.map((tag) => (
                     <Link
                       key={tag}
                       href={`/tag/${encodeURIComponent(tag)}`}
-                      className={`transition-all duration-200 font-archivo-narrow hover:drop-shadow-[0_2px_8px_rgba(0,65,255,0.2)] text-[#0041FF] uppercase tracking-custom ${
-                        tag === currentTag
+                      className={`transition-all duration-200 font-archivo-narrow text-[#0041FF] uppercase tracking-custom ${
+                        tag === props.currentTag
                           ? "font-bold font-archivo-narrow"
                           : "font-normal"
-                      }`}
+                      } hover:font-bold hover:font-archivo-narrow`}
                     >
                       {translateTag(tag)}
                     </Link>
