@@ -129,7 +129,7 @@ export default function TrabalhoPage() {
 
           {/* Imagens */}
           {isImage && trabalho.image && trabalho.image.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-0">
               {trabalho.image.map((imageUrl, index) => (
                 <Image
                   key={index}
@@ -145,7 +145,7 @@ export default function TrabalhoPage() {
 
               {/* Layout especial para Revista da Cerveja - miniaturas em linha */}
               {isRevistaDaCerveja && trabalho.image.length > 1 && (
-                <div className="flex flex-wrap gap-4 justify-center">
+                <div className="flex flex-wrap gap-4 justify-center mt-8">
                   {trabalho.image.map((imageUrl, index) => (
                     <div key={`thumb-${index}`} className="flex-shrink-0">
                       <Image
@@ -178,7 +178,7 @@ export default function TrabalhoPage() {
 
           {/* GIFs */}
           {isVideo && trabalho.image && trabalho.image.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-0">
               {trabalho.image.map((gifUrl, index) => (
                 <Image
                   key={index}

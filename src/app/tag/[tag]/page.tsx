@@ -52,7 +52,7 @@ export default function TagPage() {
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
         <main className="flex-1 w-full mx-auto py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 px-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
@@ -139,7 +139,7 @@ export default function TagPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-5 px-6">
             {trabalhosFiltrados.map((trabalho) => (
               <Link
                 key={trabalho.id}
