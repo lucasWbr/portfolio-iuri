@@ -9,7 +9,9 @@ const tagTranslations: Record<string, string> = {
   // Arte e Design
   arte: "art",
   design: "design",
+  "design gráfico": "graphic design",
   ilustração: "illustration",
+  "ilustração editorial": "editorial illustration",
   pintura: "painting",
   desenho: "drawing",
   aquarela: "watercolor",
@@ -60,8 +62,9 @@ const tagTranslations: Record<string, string> = {
 
   // Categorias Específicas do Usuário
   infantil: "kids",
+  "ilustração infantil": "kid lit illustration",
   "trabalho pessoal": "personal work",
-  "identidade visual": "visual identity",
+  "identidade visual": "brand identity",
 
   // Materiais e Técnicas
   lápis: "pencil",

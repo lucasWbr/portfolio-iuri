@@ -23,8 +23,8 @@ export default function HomeClient() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 w-full mx-auto py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
@@ -42,7 +42,7 @@ export default function HomeClient() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+        <main className="flex-1 w-full mx-auto py-8">
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">Erro ao carregar dados.</p>
           </div>
@@ -56,7 +56,7 @@ export default function HomeClient() {
     <div className="min-h-screen bg-index-custom flex flex-col">
       <Header showTags={true} tags={tags?.map((tag) => tag.name) || []} />
       {/* Grid de trabalhos */}
-      <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+      <main className="flex-1 w-full mx-auto py-8">
         {!trabalhos || trabalhos.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">Nenhum trabalho encontrado.</p>
@@ -65,7 +65,7 @@ export default function HomeClient() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
             {trabalhos.map((trabalho) => (
               <Link
                 key={trabalho.id}
@@ -82,8 +82,11 @@ export default function HomeClient() {
                     placeholder="empty"
                     unoptimized={trabalho.image[0]?.endsWith(".gif")}
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 bg-black/70">
-                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none">
+                  <div
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300"
+                    style={{ backgroundColor: "#0041ff" }}
+                  >
+                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none group-hover:scale-110 transition-transform duration-300">
                       {trabalho.name}
                     </span>
                   </div>

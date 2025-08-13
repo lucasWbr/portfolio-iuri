@@ -51,8 +51,8 @@ export default function TagPage() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <main className="flex-1 w-full mx-auto py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
@@ -70,7 +70,7 @@ export default function TagPage() {
     return (
       <div className="min-h-screen bg-index-custom flex flex-col">
         <Header showTags={true} />
-        <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+        <main className="flex-1 w-full mx-auto py-8">
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">Erro ao carregar dados.</p>
           </div>
@@ -107,7 +107,7 @@ export default function TagPage() {
         tags={tags?.map((tag) => tag.name) || []}
         currentTag={decodedTag}
       />
-      <main className="flex-1 w-[92%] mx-auto px-6 py-8">
+      <main className="flex-1 w-full mx-auto py-8">
         <div className="flex flex-col items-center mb-12">
           <div className="relative flex items-center w-full max-w-7xl mx-auto px-6 pt-8 pb-2 mb-4">
             <div className="absolute left-0">
@@ -139,7 +139,7 @@ export default function TagPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-0 px-6">
             {trabalhosFiltrados.map((trabalho) => (
               <Link
                 key={trabalho.id}
@@ -154,8 +154,11 @@ export default function TagPage() {
                     fill
                     className="object-cover transition-transform duration-200"
                   />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300 bg-black/70">
-                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none">
+                  <div
+                    className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-300"
+                    style={{ backgroundColor: "#0041ff" }}
+                  >
+                    <span className="text-white font-bold font-archivo-narrow text-xl md:text-2xl lg:text-3xl text-center px-2 select-none group-hover:scale-110 transition-transform duration-300">
                       {trabalho.name}
                     </span>
                   </div>

@@ -2,7 +2,8 @@
 
 import { useLanguage } from "@/hooks/use-language";
 import { Button } from "@/components/ui/button";
-import { Globe } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 export default function LanguageToggle({
   className = "",
@@ -33,7 +34,7 @@ export default function LanguageToggle({
       className={`flex items-center gap-2 transition-all duration-200 ${className}`}
       title={tooltipText}
     >
-      <Globe className="h-4 w-4" />
+      <FontAwesomeIcon icon={faGlobe} className="h-4 w-4" />
       <span className="text-sm font-medium">{currentLanguageCode}</span>
     </Button>
   );

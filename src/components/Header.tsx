@@ -3,7 +3,8 @@
 import Link from "next/link";
 import LanguageToggle from "./LanguageToggle";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars, faXmark } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/use-language";
 import "@fontsource/archivo-narrow/400.css";
@@ -65,7 +66,7 @@ export default function Header(props: HeaderProps) {
                   <Link
                     key={tag}
                     href={`/tag/${encodeURIComponent(tag)}`}
-                    className={`whitespace-nowrap font-archivo-narrow capitalize transition-all duration-200 text-[#0041FF] uppercase tracking-custom ${
+                    className={`whitespace-nowrap font-archivo-narrow transition-all duration-200 text-[#0041FF] uppercase tracking-custom ${
                       tag === props.currentTag
                         ? "font-bold font-archivo-narrow"
                         : "font-normal"
@@ -117,9 +118,9 @@ export default function Header(props: HeaderProps) {
             className="text-[#0041ff] hover:text-blue-900 transition-colors duration-200"
           >
             {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
+              <FontAwesomeIcon icon={faXmark} className="h-6 w-6" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
             )}
           </button>
         </div>

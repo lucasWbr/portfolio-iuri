@@ -197,12 +197,12 @@ export default function TrabalhoPage() {
 
         {/* Texto descritivo (opcional) */}
         {displayText && (
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="mt-10">
             <div className="prose prose-gray max-w-none">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              <h2 className="text-xl font-semibold text-[#0041FF] mb-4">
                 {language === "en" ? "About this work" : "Sobre este trabalho"}
               </h2>
-              <p className="text-lg font-archivo-narrow text-[#0041FF] tracking-custom mt-4 max-w-3xl mx-auto">
+              <p className="text-lg font-archivo-narrow text-[#0041FF] tracking-custom mt-4 max-w-3xl">
                 {displayText}
               </p>
             </div>
